@@ -7,4 +7,3 @@ import { DepartmentsService } from './departments.service';
   providers: [DepartmentsService],
 })
 export class DepartmentsModule {}
-

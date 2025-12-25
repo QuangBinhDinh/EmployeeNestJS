@@ -13,11 +13,7 @@ export class DepartmentsService {
   ) {}
 
   async findAll(limit: number = 10, offset: number = 0): Promise<Department[]> {
-    return await this.db
-      .select()
-      .from(schema.departments)
-      .limit(limit)
-      .offset(offset);
+    return await this.db.select().from(schema.departments).limit(limit).offset(offset);
   }
 
   async findOne(deptNo: string): Promise<Department> {
@@ -62,4 +58,3 @@ export class DepartmentsService {
     }
   }
 }
-

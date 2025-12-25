@@ -6,4 +6,3 @@ export class CreateEmployeeDto {
   gender: 'M' | 'F';
   hireDate: string;
 }
-

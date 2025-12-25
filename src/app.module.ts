@@ -7,4 +7,3 @@ import { DepartmentsModule } from './departments/departments.module';
   imports: [DatabaseModule, EmployeesModule, DepartmentsModule],
 })
 export class AppModule {}
-

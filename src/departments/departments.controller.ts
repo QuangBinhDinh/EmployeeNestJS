@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
@@ -17,10 +8,7 @@ export class DepartmentsController {
   constructor(private readonly departmentsService: DepartmentsService) {}
 
   @Get()
-  findAll(
-    @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
-  ) {
+  findAll(@Query('limit') limit?: string, @Query('offset') offset?: string) {
     return this.departmentsService.findAll(
       limit ? parseInt(limit) : 10,
       offset ? parseInt(offset) : 0,
@@ -38,10 +26,7 @@ export class DepartmentsController {
   }
 
   @Put(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateDepartmentDto: UpdateDepartmentDto,
-  ) {
+  update(@Param('id') id: string, @Body() updateDepartmentDto: UpdateDepartmentDto) {
     return this.departmentsService.update(id, updateDepartmentDto);
   }
 
@@ -50,4 +35,3 @@ export class DepartmentsController {
     return this.departmentsService.remove(id);
   }
 }
-

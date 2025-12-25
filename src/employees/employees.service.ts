@@ -3,7 +3,7 @@ import { MySql2Database } from 'drizzle-orm/mysql2';
 import { eq } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import * as schema from '../db/schema';
-import { Employee, NewEmployee } from '../db/schema';
+import { Employee } from '../db/schema';
 
 @Injectable()
 export class EmployeesService {
@@ -13,11 +13,7 @@ export class EmployeesService {
   ) {}
 
   async findAll(limit: number = 10, offset: number = 0): Promise<Employee[]> {
-    return await this.db
-      .select()
-      .from(schema.employees)
-      .limit(limit)
-      .offset(offset);
+    return await this.db.select().from(schema.employees).limit(limit).offset(offset);
   }
 
   async findOne(empNo: number): Promise<Employee> {
@@ -52,7 +48,7 @@ export class EmployeesService {
     if (employee.hireDate) {
       updateData.hireDate = new Date(employee.hireDate);
     }
-    
+
     const result = await this.db
       .update(schema.employees)
       .set(updateData)
@@ -66,13 +62,10 @@ export class EmployeesService {
   }
 
   async remove(empNo: number): Promise<void> {
-    const result = await this.db
-      .delete(schema.employees)
-      .where(eq(schema.employees.empNo, empNo));
+    const result = await this.db.delete(schema.employees).where(eq(schema.employees.empNo, empNo));
 
     if (result[0].affectedRows === 0) {
       throw new NotFoundException(`Employee with ID ${empNo} not found`);
     }
   }
 }
-

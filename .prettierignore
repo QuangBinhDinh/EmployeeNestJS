@@ -1,0 +1,8 @@
+node_modules
+dist
+coverage
+.git
+pms-main
+package-lock.json
+*.md
+

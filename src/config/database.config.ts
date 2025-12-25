@@ -5,4 +5,3 @@ export const databaseConfig = {
   password: process.env.DB_PASSWORD || 'Nhsv2025',
   database: process.env.DB_NAME || 'employees',
 };
-

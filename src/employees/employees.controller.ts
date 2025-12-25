@@ -18,12 +18,9 @@ export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 
   @Get()
-  findAll(
-    @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
-  ) {
+  findAll(@Query('limit') limit?: string, @Query('offset') offset?: string) {
     return this.employeesService.findAll(
-      limit ? parseInt(limit) : 10,
+      limit ? parseInt(limit) : 0,
       offset ? parseInt(offset) : 0,
     );
   }
@@ -39,10 +36,7 @@ export class EmployeesController {
   }
 
   @Put(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateEmployeeDto: UpdateEmployeeDto,
-  ) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateEmployeeDto: UpdateEmployeeDto) {
     return this.employeesService.update(id, updateEmployeeDto);
   }
 
@@ -51,4 +45,3 @@ export class EmployeesController {
     return this.employeesService.remove(id);
   }
 }
-

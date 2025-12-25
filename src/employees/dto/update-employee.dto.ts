@@ -5,4 +5,3 @@ export class UpdateEmployeeDto {
   gender?: 'M' | 'F';
   hireDate?: string;
 }
-

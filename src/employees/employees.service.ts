@@ -1,71 +1,92 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { MySql2Database } from 'drizzle-orm/mysql2';
-import { eq } from 'drizzle-orm';
-import { DATABASE_CONNECTION } from '../db/database.module';
-import * as schema from '../db/schema';
-import { Employee } from '../db/schema';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { EmployeesRepository } from './employees.repository';
+import { CreateEmployeeRequest } from './dto/request/create-employee.request';
+import { UpdateEmployeeRequest } from './dto/request/update-employee.request';
+import { GetEmployeeResponse } from './dto/response/get-employee.response';
 
 @Injectable()
 export class EmployeesService {
-  constructor(
-    @Inject(DATABASE_CONNECTION)
-    private db: MySql2Database<typeof schema>,
-  ) {}
+  public constructor(private readonly employeesRepository: EmployeesRepository) {}
 
-  async findAll(limit: number = 10, offset: number = 0): Promise<Employee[]> {
-    return await this.db.select().from(schema.employees).limit(limit).offset(offset);
+  public async findAll(limit: number = 10, offset: number = 0): Promise<GetEmployeeResponse[]> {
+    const employees = await this.employeesRepository.findAll(limit, offset);
+    return employees.map((emp) => this.mapToResponse(emp));
   }
 
-  async findOne(empNo: number): Promise<Employee> {
-    const result = await this.db
-      .select()
-      .from(schema.employees)
-      .where(eq(schema.employees.empNo, empNo))
-      .limit(1);
+  public async findOne(empNo: number): Promise<GetEmployeeResponse> {
+    const employee = await this.employeesRepository.findOne(empNo);
 
-    if (result.length === 0) {
+    if (!employee) {
       throw new NotFoundException(`Employee with ID ${empNo} not found`);
     }
 
-    return result[0];
+    return this.mapToResponse(employee);
   }
 
-  async create(employee: any): Promise<Employee> {
+  public async create(request: CreateEmployeeRequest): Promise<GetEmployeeResponse> {
     const employeeData = {
-      ...employee,
-      birthDate: new Date(employee.birthDate),
-      hireDate: new Date(employee.hireDate),
+      empNo: request.empNo,
+      birthDate: new Date(request.birthDate),
+      firstName: request.firstName,
+      lastName: request.lastName,
+      gender: request.gender,
+      hireDate: new Date(request.hireDate),
     };
-    await this.db.insert(schema.employees).values(employeeData);
-    return this.findOne(employee.empNo);
+
+    await this.employeesRepository.create(employeeData);
+    return this.findOne(request.empNo);
   }
 
-  async update(empNo: number, employee: any): Promise<Employee> {
-    const updateData: any = { ...employee };
-    if (employee.birthDate) {
-      updateData.birthDate = new Date(employee.birthDate);
+  public async update(empNo: number, request: UpdateEmployeeRequest): Promise<GetEmployeeResponse> {
+    const updateData: any = {};
+
+    if (request.birthDate) {
+      updateData.birthDate = new Date(request.birthDate);
     }
-    if (employee.hireDate) {
-      updateData.hireDate = new Date(employee.hireDate);
+    if (request.firstName) {
+      updateData.firstName = request.firstName;
+    }
+    if (request.lastName) {
+      updateData.lastName = request.lastName;
+    }
+    if (request.gender) {
+      updateData.gender = request.gender;
+    }
+    if (request.hireDate) {
+      updateData.hireDate = new Date(request.hireDate);
     }
 
-    const result = await this.db
-      .update(schema.employees)
-      .set(updateData)
-      .where(eq(schema.employees.empNo, empNo));
+    const affectedRows = await this.employeesRepository.update(empNo, updateData);
 
-    if (result[0].affectedRows === 0) {
+    if (affectedRows === 0) {
       throw new NotFoundException(`Employee with ID ${empNo} not found`);
     }
 
     return this.findOne(empNo);
   }
 
-  async remove(empNo: number): Promise<void> {
-    const result = await this.db.delete(schema.employees).where(eq(schema.employees.empNo, empNo));
+  public async remove(empNo: number): Promise<void> {
+    const affectedRows = await this.employeesRepository.remove(empNo);
 
-    if (result[0].affectedRows === 0) {
+    if (affectedRows === 0) {
       throw new NotFoundException(`Employee with ID ${empNo} not found`);
     }
+  }
+
+  private mapToResponse(employee: any): GetEmployeeResponse {
+    return {
+      empNo: employee.empNo,
+      birthDate:
+        employee.birthDate instanceof Date
+          ? employee.birthDate.toISOString().split('T')[0]
+          : employee.birthDate,
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      gender: employee.gender,
+      hireDate:
+        employee.hireDate instanceof Date
+          ? employee.hireDate.toISOString().split('T')[0]
+          : employee.hireDate,
+    };
   }
 }

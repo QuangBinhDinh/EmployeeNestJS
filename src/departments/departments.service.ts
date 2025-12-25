@@ -1,60 +1,69 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { MySql2Database } from 'drizzle-orm/mysql2';
-import { eq } from 'drizzle-orm';
-import { DATABASE_CONNECTION } from '../db/database.module';
-import * as schema from '../db/schema';
-import { Department, NewDepartment } from '../db/schema';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { DepartmentsRepository } from './departments.repository';
+import { CreateDepartmentRequest } from './dto/request/create-department.request';
+import { UpdateDepartmentRequest } from './dto/request/update-department.request';
+import { GetDepartmentResponse } from './dto/response/get-department.response';
 
 @Injectable()
 export class DepartmentsService {
-  constructor(
-    @Inject(DATABASE_CONNECTION)
-    private db: MySql2Database<typeof schema>,
-  ) {}
+  public constructor(private readonly departmentsRepository: DepartmentsRepository) {}
 
-  async findAll(limit: number = 10, offset: number = 0): Promise<Department[]> {
-    return await this.db.select().from(schema.departments).limit(limit).offset(offset);
+  public async findAll(limit: number = 10, offset: number = 0): Promise<GetDepartmentResponse[]> {
+    const departments = await this.departmentsRepository.findAll(limit, offset);
+    return departments.map((dept) => this.mapToResponse(dept));
   }
 
-  async findOne(deptNo: string): Promise<Department> {
-    const result = await this.db
-      .select()
-      .from(schema.departments)
-      .where(eq(schema.departments.deptNo, deptNo))
-      .limit(1);
+  public async findOne(deptNo: string): Promise<GetDepartmentResponse> {
+    const department = await this.departmentsRepository.findOne(deptNo);
 
-    if (result.length === 0) {
+    if (!department) {
       throw new NotFoundException(`Department with ID ${deptNo} not found`);
     }
 
-    return result[0];
+    return this.mapToResponse(department);
   }
 
-  async create(department: NewDepartment): Promise<Department> {
-    await this.db.insert(schema.departments).values(department);
-    return this.findOne(department.deptNo);
+  public async create(request: CreateDepartmentRequest): Promise<GetDepartmentResponse> {
+    const departmentData = {
+      deptNo: request.deptNo,
+      deptName: request.deptName,
+    };
+
+    await this.departmentsRepository.create(departmentData);
+    return this.findOne(request.deptNo);
   }
 
-  async update(deptNo: string, department: Partial<NewDepartment>): Promise<Department> {
-    const result = await this.db
-      .update(schema.departments)
-      .set(department)
-      .where(eq(schema.departments.deptNo, deptNo));
+  public async update(
+    deptNo: string,
+    request: UpdateDepartmentRequest,
+  ): Promise<GetDepartmentResponse> {
+    const updateData: any = {};
 
-    if (result[0].affectedRows === 0) {
+    if (request.deptName) {
+      updateData.deptName = request.deptName;
+    }
+
+    const affectedRows = await this.departmentsRepository.update(deptNo, updateData);
+
+    if (affectedRows === 0) {
       throw new NotFoundException(`Department with ID ${deptNo} not found`);
     }
 
     return this.findOne(deptNo);
   }
 
-  async remove(deptNo: string): Promise<void> {
-    const result = await this.db
-      .delete(schema.departments)
-      .where(eq(schema.departments.deptNo, deptNo));
+  public async remove(deptNo: string): Promise<void> {
+    const affectedRows = await this.departmentsRepository.remove(deptNo);
 
-    if (result[0].affectedRows === 0) {
+    if (affectedRows === 0) {
       throw new NotFoundException(`Department with ID ${deptNo} not found`);
     }
+  }
+
+  private mapToResponse(department: any): GetDepartmentResponse {
+    return {
+      deptNo: department.deptNo,
+      deptName: department.deptName,
+    };
   }
 }

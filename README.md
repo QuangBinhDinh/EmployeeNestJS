@@ -8,6 +8,12 @@ A NestJS application with CRUD operations for managing employees and departments
 - **Departments CRUD**: Create, Read, Update, Delete operations for departments
 - **DrizzleORM**: Type-safe database queries with TypeScript
 - **MySQL Database**: Connected to the existing employees database
+- **Request Validation**: Automatic validation with class-validator
+- **Swagger Documentation**: Interactive API documentation at `/api`
+- **Repository Pattern**: Separation of data access and business logic
+- **Professional Structure**: Request/Response DTOs, Service/Repository layers
+- **Hot Reload**: Automatic server restart on file changes
+- **Code Quality**: ESLint and Prettier configured
 
 ## Prerequisites
 
@@ -56,6 +62,8 @@ npm run start:prod
 ```
 
 The application will start on `http://localhost:3000`
+
+**Swagger Documentation**: http://localhost:3000/api
 
 ## API Endpoints
 
@@ -142,4 +150,19 @@ src/
 - **DrizzleORM**: TypeScript ORM
 - **MySQL2**: MySQL client for Node.js
 - **TypeScript**: Type-safe JavaScript
+- **class-validator**: Request validation
+- **class-transformer**: Data transformation
+- **Swagger/OpenAPI**: API documentation
+- **ESLint & Prettier**: Code quality tools
+
+## Recent Improvements
+
+✅ **Repository Pattern**: Separated data access from business logic  
+✅ **Request/Response DTOs**: Organized into separate folders  
+✅ **Validation**: Automatic request validation with class-validator  
+✅ **Swagger Documentation**: Interactive API docs at `/api`  
+✅ **Explicit Public Methods**: All methods clearly marked as public  
+✅ **Code Quality**: ESLint and Prettier configured and enforced  
+
+See [IMPROVEMENTS.md](./IMPROVEMENTS.md) for detailed information about all improvements.
 

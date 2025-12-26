@@ -2,28 +2,50 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { EmployeesRepository } from './employees.repository';
 import { CreateEmployeeRequest } from './dto/request/create-employee.request';
 import { UpdateEmployeeRequest } from './dto/request/update-employee.request';
-import { GetEmployeeResponse } from './dto/response/get-employee.response';
+import { DEFAULT_PAGE_SIZE } from '../common/constants/pagination.constants';
+import { Employee } from './employees.schema';
+
+export interface PaginatedEmployees {
+  items: Employee[];
+  totalCount: number;
+}
 
 @Injectable()
 export class EmployeesService {
   public constructor(private readonly employeesRepository: EmployeesRepository) {}
 
-  public async findAll(limit: number = 10, offset: number = 0): Promise<GetEmployeeResponse[]> {
-    const employees = await this.employeesRepository.findAll(limit, offset);
-    return employees.map((emp) => this.mapToResponse(emp));
+  public async findAll(
+    pageId?: number,
+    pageSize?: number,
+  ): Promise<Employee[] | PaginatedEmployees> {
+    // If pagination params are provided
+    if (pageId !== undefined && pageSize !== undefined) {
+      const offset = (pageId - 1) * pageSize;
+      const [employees, totalCount] = await Promise.all([
+        this.employeesRepository.findAll(pageSize, offset),
+        this.employeesRepository.count(),
+      ]);
+
+      return {
+        items: employees,
+        totalCount,
+      };
+    }
+
+    // Default behavior without pagination
+    return this.employeesRepository.findAll(DEFAULT_PAGE_SIZE, 0);
   }
 
-  public async findOne(empNo: number): Promise<GetEmployeeResponse> {
+  public async findOne(empNo: number): Promise<Employee> {
     const employee = await this.employeesRepository.findOne(empNo);
 
     if (!employee) {
       throw new NotFoundException(`Employee with ID ${empNo} not found`);
     }
-
-    return this.mapToResponse(employee);
+    return employee;
   }
 
-  public async create(request: CreateEmployeeRequest): Promise<GetEmployeeResponse> {
+  public async create(request: CreateEmployeeRequest): Promise<Employee> {
     const employeeData = {
       empNo: request.empNo,
       birthDate: new Date(request.birthDate),
@@ -37,7 +59,7 @@ export class EmployeesService {
     return this.findOne(request.empNo);
   }
 
-  public async update(empNo: number, request: UpdateEmployeeRequest): Promise<GetEmployeeResponse> {
+  public async update(empNo: number, request: UpdateEmployeeRequest): Promise<Employee> {
     const updateData: any = {};
 
     if (request.birthDate) {
@@ -71,22 +93,5 @@ export class EmployeesService {
     if (affectedRows === 0) {
       throw new NotFoundException(`Employee with ID ${empNo} not found`);
     }
-  }
-
-  private mapToResponse(employee: any): GetEmployeeResponse {
-    return {
-      empNo: employee.empNo,
-      birthDate:
-        employee.birthDate instanceof Date
-          ? employee.birthDate.toISOString().split('T')[0]
-          : employee.birthDate,
-      firstName: employee.firstName,
-      lastName: employee.lastName,
-      gender: employee.gender,
-      hireDate:
-        employee.hireDate instanceof Date
-          ? employee.hireDate.toISOString().split('T')[0]
-          : employee.hireDate,
-    };
   }
 }

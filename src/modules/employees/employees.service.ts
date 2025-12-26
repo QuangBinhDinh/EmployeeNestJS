@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { EmployeesRepository } from './employees.repository';
-import { CreateEmployeeRequest } from './dto/request/create-employee.request';
-import { UpdateEmployeeRequest } from './dto/request/update-employee.request';
-import { DEFAULT_PAGE_SIZE } from '../common/constants/pagination.constants';
-import { Employee } from './employees.schema';
+import { Injectable } from '@nestjs/common';
+import { EmployeesRepository } from '@modules/employees/employees.repository';
+import { CreateEmployeeRequest } from '@modules/employees/dto/request/create-employee.request';
+import { UpdateEmployeeRequest } from '@modules/employees/dto/request/update-employee.request';
+import { DEFAULT_PAGE_SIZE } from '@common/constants/pagination.constants';
+import { Employee } from '@modules/employees/employees.schema';
+import { NotFoundError } from '@common/exceptions/base.error';
 
 export interface PaginatedEmployees {
   items: Employee[];
@@ -40,7 +41,7 @@ export class EmployeesService {
     const employee = await this.employeesRepository.findOne(empNo);
 
     if (!employee) {
-      throw new NotFoundException(`Employee with ID ${empNo} not found`);
+      throw new NotFoundError(`Employee with ID ${empNo}`);
     }
     return employee;
   }
@@ -81,7 +82,7 @@ export class EmployeesService {
     const affectedRows = await this.employeesRepository.update(empNo, updateData);
 
     if (affectedRows === 0) {
-      throw new NotFoundException(`Employee with ID ${empNo} not found`);
+      throw new NotFoundError(`Employee with ID ${empNo}`);
     }
 
     return this.findOne(empNo);
@@ -91,7 +92,7 @@ export class EmployeesService {
     const affectedRows = await this.employeesRepository.remove(empNo);
 
     if (affectedRows === 0) {
-      throw new NotFoundException(`Employee with ID ${empNo} not found`);
+      throw new NotFoundError(`Employee with ID ${empNo}`);
     }
   }
 }

@@ -1,8 +1,9 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule } from '@modules/app.module';
 import * as dotenv from 'dotenv';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { GlobalExceptionFilter } from '@common/filters/global-exception.filter';
 
 dotenv.config();
 
@@ -11,6 +12,9 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors();
+
+  // Global exception filter
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   // Global validation pipe
   app.useGlobalPipes(

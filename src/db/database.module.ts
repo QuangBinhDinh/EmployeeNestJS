@@ -1,7 +1,7 @@
 import { Module, Global } from '@nestjs/common';
 import { drizzle } from 'drizzle-orm/mysql2';
 import * as mysql from 'mysql2/promise';
-import { databaseConfig } from '../config/database.config';
+import { databaseConfig } from '@config/database.config';
 
 export const DATABASE_CONNECTION = 'DATABASE_CONNECTION';
 

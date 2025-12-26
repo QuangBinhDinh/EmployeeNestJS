@@ -13,15 +13,15 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
-import { EmployeesService } from './employees.service';
-import { CreateEmployeeRequest } from './dto/request/create-employee.request';
-import { UpdateEmployeeRequest } from './dto/request/update-employee.request';
-import { ResponseInterceptor } from '../common/interceptors/response.interceptor';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
-import { ApiResponseDto } from '../common/dto/paginated-response.dto';
-import { EntityMapper } from '../common/mappers/entity.mapper';
-import { GetEmployeeResponse } from './dto/response/get-employee.response';
-import { Employee } from './employees.schema';
+import { EmployeesService } from '@modules/employees/employees.service';
+import { CreateEmployeeRequest } from '@modules/employees/dto/request/create-employee.request';
+import { UpdateEmployeeRequest } from '@modules/employees/dto/request/update-employee.request';
+import { ResponseInterceptor } from '@common/interceptors/response.interceptor';
+import { PaginationQueryDto } from '@common/dto/pagination-query.dto';
+import { ApiResponseDto } from '@common/dto/paginated-response.dto';
+import { EntityMapper } from '@common/mappers/entity.mapper';
+import { GetEmployeeResponse } from '@modules/employees/dto/response/get-employee.response';
+import { Employee } from '@modules/employees/employees.schema';
 
 @ApiTags('Employees')
 @Controller('employees')

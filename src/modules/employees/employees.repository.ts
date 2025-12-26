@@ -1,8 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { MySql2Database } from 'drizzle-orm/mysql2';
-import { DATABASE_CONNECTION } from '../db/database.module';
-import { employees } from './employees.schema';
-import { BaseRepository } from '../common/repositories/base.repository';
+import { DATABASE_CONNECTION } from '@db/database.module';
+import { employees } from '@modules/employees/employees.schema';
+import { BaseRepository } from '@common/repositories/base.repository';
 
 @Injectable()
 export class EmployeesRepository extends BaseRepository<typeof employees> {

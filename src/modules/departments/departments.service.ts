@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { DepartmentsRepository } from './departments.repository';
-import { CreateDepartmentRequest } from './dto/request/create-department.request';
-import { UpdateDepartmentRequest } from './dto/request/update-department.request';
-import { DEFAULT_PAGE_SIZE } from '../common/constants/pagination.constants';
-import { Department } from './departments.schema';
+import { Injectable } from '@nestjs/common';
+import { DepartmentsRepository } from '@modules/departments/departments.repository';
+import { CreateDepartmentRequest } from '@modules/departments/dto/request/create-department.request';
+import { UpdateDepartmentRequest } from '@modules/departments/dto/request/update-department.request';
+import { DEFAULT_PAGE_SIZE } from '@common/constants/pagination.constants';
+import { Department } from '@modules/departments/departments.schema';
+import { NotFoundError } from '@common/exceptions/base.error';
 
 @Injectable()
 export class DepartmentsService {
@@ -20,7 +21,7 @@ export class DepartmentsService {
     const department = await this.departmentsRepository.findOne(deptNo);
 
     if (!department) {
-      throw new NotFoundException(`Department with ID ${deptNo} not found`);
+      throw new NotFoundError(`Department with ID ${deptNo}`);
     }
 
     return department;
@@ -46,7 +47,7 @@ export class DepartmentsService {
     const affectedRows = await this.departmentsRepository.update(deptNo, updateData);
 
     if (affectedRows === 0) {
-      throw new NotFoundException(`Department with ID ${deptNo} not found`);
+      throw new NotFoundError(`Department with ID ${deptNo}`);
     }
 
     return this.findOne(deptNo);
@@ -56,7 +57,7 @@ export class DepartmentsService {
     const affectedRows = await this.departmentsRepository.remove(deptNo);
 
     if (affectedRows === 0) {
-      throw new NotFoundException(`Department with ID ${deptNo} not found`);
+      throw new NotFoundError(`Department with ID ${deptNo}`);
     }
   }
 }

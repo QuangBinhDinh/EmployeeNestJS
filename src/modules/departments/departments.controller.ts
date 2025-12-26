@@ -11,12 +11,12 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiQuery, ApiOperation } from '@nestjs/swagger';
-import { DepartmentsService } from './departments.service';
-import { CreateDepartmentRequest } from './dto/request/create-department.request';
-import { UpdateDepartmentRequest } from './dto/request/update-department.request';
-import { GetDepartmentResponse } from './dto/response/get-department.response';
-import { DEFAULT_PAGE_SIZE } from '../common/constants/pagination.constants';
-import { EntityMapper } from '../common/mappers/entity.mapper';
+import { DepartmentsService } from '@modules/departments/departments.service';
+import { CreateDepartmentRequest } from '@modules/departments/dto/request/create-department.request';
+import { UpdateDepartmentRequest } from '@modules/departments/dto/request/update-department.request';
+import { GetDepartmentResponse } from '@modules/departments/dto/response/get-department.response';
+import { DEFAULT_PAGE_SIZE } from '@common/constants/pagination.constants';
+import { EntityMapper } from '@common/mappers/entity.mapper';
 
 @ApiTags('Departments')
 @Controller('departments')

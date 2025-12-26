@@ -1,7 +1,7 @@
-import { Employee } from '../../employees/employees.schema';
-import { Department } from '../../departments/departments.schema';
-import { GetEmployeeResponse } from '../../employees/dto/response/get-employee.response';
-import { GetDepartmentResponse } from '../../departments/dto/response/get-department.response';
+import { Employee } from '@modules/employees/employees.schema';
+import { Department } from '@modules/departments/departments.schema';
+import { GetEmployeeResponse } from '@modules/employees/dto/response/get-employee.response';
+import { GetDepartmentResponse } from '@modules/departments/dto/response/get-department.response';
 
 export class EntityMapper {
   /**

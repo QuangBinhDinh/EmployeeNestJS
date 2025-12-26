@@ -9,33 +9,31 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiTags, ApiResponse, ApiQuery, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { DepartmentsService } from '@modules/departments/departments.service';
-import { CreateDepartmentRequest } from '@modules/departments/dto/request/create-department.request';
-import { UpdateDepartmentRequest } from '@modules/departments/dto/request/update-department.request';
-import { GetDepartmentResponse } from '@modules/departments/dto/response/get-department.response';
-import { DEFAULT_PAGE_SIZE } from '@common/constants/pagination.constants';
+import {
+  CreateDepartmentRequest,
+  UpdateDepartmentRequest,
+  GetDepartmentResponse,
+} from '@modules/departments/dto';
 import { EntityMapper } from '@common/mappers/entity.mapper';
+import { ResponseInterceptor } from '@common/interceptors/response.interceptor';
+import { PaginationQueryDto } from '@common/dto/pagination-query.dto';
+import { ApiResponseDto } from '@common/dto/paginated-response.dto';
 
 @ApiTags('Departments')
 @Controller('departments')
+@UseInterceptors(ResponseInterceptor)
 export class DepartmentsController {
   public constructor(private readonly departmentsService: DepartmentsService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all departments' })
-  @ApiResponse({ status: 200, type: GetDepartmentResponse, isArray: true })
-  @ApiQuery({ name: 'limit', required: false, type: Number, example: 50 })
-  @ApiQuery({ name: 'offset', required: false, type: Number, example: 0 })
-  public async findAll(
-    @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
-  ): Promise<GetDepartmentResponse[]> {
-    const departments = await this.departmentsService.findAll(
-      limit ? parseInt(limit) : DEFAULT_PAGE_SIZE,
-      offset ? parseInt(offset) : 0,
-    );
+  @ApiResponse({ status: 200, type: ApiResponseDto })
+  public async findAll(@Query() query: PaginationQueryDto): Promise<GetDepartmentResponse[]> {
+    const departments = await this.departmentsService.findAll(query.pageId, query.pageSize);
     return departments.map(EntityMapper.toDepartmentResponse);
   }
 

@@ -1,6 +1,6 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpStatus, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { BaseError } from '@common/exceptions/base.error';
+import { BaseError } from '@common/exceptions';
 
 export interface ErrorApiResponse {
   status: number;

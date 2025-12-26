@@ -1,7 +1,8 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Inject } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Request } from 'express';
+import { PaginationMetadata } from '@common/services/pagination-metadata.service';
 
 export interface ApiResponse<T> {
   status: number;
@@ -15,13 +16,12 @@ export interface ApiResponse<T> {
   };
 }
 
-export interface PaginatedData<T> {
-  items: T;
-  totalCount: number;
-}
-
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
+  constructor(
+    @Inject(PaginationMetadata) private readonly paginationMetadata: PaginationMetadata,
+  ) {}
+
   intercept(context: ExecutionContext, next: CallHandler): Observable<ApiResponse<T>> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse();
@@ -37,22 +37,15 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, ApiResponse<T>
 
         const shouldPaginate = isGetRequest && pageId !== null && pageSize !== null;
 
-        // Handle paginated response
-        if (
-          shouldPaginate &&
-          data &&
-          typeof data === 'object' &&
-          'items' in data &&
-          'totalCount' in data
-        ) {
-          const paginatedData = data as PaginatedData<any>;
-          const totalCount = paginatedData.totalCount;
+        // Handle paginated response using metadata
+        if (shouldPaginate && this.paginationMetadata.hasMetadata()) {
+          const totalCount = this.paginationMetadata.getTotalCount()!;
           const hasNext = pageId * pageSize < totalCount;
 
           return {
             status,
             message: '',
-            data: paginatedData.items,
+            data: data as T,
             meta: {
               pageId,
               pageSize,

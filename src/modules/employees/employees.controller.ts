@@ -14,14 +14,12 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { EmployeesService } from '@modules/employees/employees.service';
-import { CreateEmployeeRequest } from '@modules/employees/dto/request/create-employee.request';
-import { UpdateEmployeeRequest } from '@modules/employees/dto/request/update-employee.request';
+import { CreateEmployeeRequest, UpdateEmployeeRequest } from '@modules/employees/dto';
 import { ResponseInterceptor } from '@common/interceptors/response.interceptor';
 import { PaginationQueryDto } from '@common/dto/pagination-query.dto';
 import { ApiResponseDto } from '@common/dto/paginated-response.dto';
 import { EntityMapper } from '@common/mappers/entity.mapper';
 import { GetEmployeeResponse } from '@modules/employees/dto/response/get-employee.response';
-import { Employee } from '@modules/employees/employees.schema';
 
 @ApiTags('Employees')
 @Controller('employees')
@@ -37,18 +35,8 @@ export class EmployeesController {
     type: ApiResponseDto,
   })
   public async findAll(@Query() query: PaginationQueryDto) {
-    const result = await this.employeesService.findAll(query.pageId, query.pageSize);
-
-    // If paginated result
-    if ('items' in result && 'totalCount' in result) {
-      return {
-        items: result.items.map(EntityMapper.toEmployeeResponse),
-        totalCount: result.totalCount,
-      };
-    }
-
-    // If array result
-    return (result as Employee[]).map(EntityMapper.toEmployeeResponse);
+    const employees = await this.employeesService.findAll(query.pageId, query.pageSize);
+    return employees.map(EntityMapper.toEmployeeResponse);
   }
 
   @Get(':id')

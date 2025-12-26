@@ -22,11 +22,11 @@
       "@/*": ["src/*"],
       "@modules/*": ["src/modules/*"],
       "@common/*": ["src/common/*"],
-      "@config/*": ["src/config/*"],
-      "@config": ["src/config"],
+      "@config/*": ["src/database/*"],
+      "@config": ["src/database"],
       "@db/*": ["src/db/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "drizzle.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

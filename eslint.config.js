@@ -3,7 +3,14 @@ const typescriptParser = require('@typescript-eslint/parser');
 
 module.exports = [
   {
-    ignores: ['node_modules/**', 'dist/**', 'coverage/**', 'pms-main/**', '*.config.js'],
+    ignores: [
+      'node_modules/**',
+      'dist/**',
+      'coverage/**',
+      'pms-main/**',
+      '*.config.js',
+      'drizzle.config.ts',
+    ],
   },
   {
     files: ['**/*.ts'],
@@ -31,4 +38,3 @@ module.exports = [
     },
   },
 ];
-

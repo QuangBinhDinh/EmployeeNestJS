@@ -7,8 +7,6 @@ dist
 # Ignore pms-main folder and all its content
 pms-main/
 
-database/
-
 # But don't ignore config files
 !eslint.config.js
 

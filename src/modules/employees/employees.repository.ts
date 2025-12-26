@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { MySql2Database } from 'drizzle-orm/mysql2';
-import { DATABASE_CONNECTION } from '@db/database.module';
+import { DATABASE_CONNECTION } from '@config';
 import { employees } from '@modules/employees/employees.schema';
 import { BaseRepository } from '@common/repositories/base.repository';
 

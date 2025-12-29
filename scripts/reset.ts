@@ -1,15 +1,17 @@
 import * as mysql from 'mysql2/promise';
 import * as dotenv from 'dotenv';
+import * as fs from 'fs';
+import * as path from 'path';
 
 dotenv.config();
 
 async function resetDatabase() {
-  console.log('⚠️  WARNING: This will completely wipe your database!');
+  console.log('⚠️  WARNING: This will completely wipe your database and migrations!');
 
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '3306'),
-    user: process.env.DB_USER || 'root',
+    user: process.env.DB_USER || 'nhsvlocal',
     password: process.env.DB_PASSWORD || 'Nhsv2025',
     database: process.env.DB_NAME || 'employees',
     multipleStatements: true,
@@ -38,6 +40,16 @@ async function resetDatabase() {
 
     // Re-enable foreign key checks
     await connection.query('SET FOREIGN_KEY_CHECKS = 1;');
+
+    console.log('✅ Database tables dropped successfully!');
+
+    // Clear migrations folder
+    console.log('🗑️  Clearing migrations folder...');
+    const migrationsPath = path.join(__dirname, '../drizzle/migrations');
+    if (fs.existsSync(migrationsPath)) {
+      fs.rmSync(migrationsPath, { recursive: true, force: true });
+      console.log('✅ Migrations folder cleared!');
+    }
 
     console.log('✅ Database reset completed successfully!');
     console.log('💡 Run "npm run db:migrate" to recreate tables');

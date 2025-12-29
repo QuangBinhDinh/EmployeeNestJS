@@ -12,7 +12,7 @@ async function runMigrations() {
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '3306'),
-    user: process.env.DB_USER || 'root',
+    user: process.env.DB_USER || 'nhsvlocal',
     password: process.env.DB_PASSWORD || 'Nhsv2025',
     database: process.env.DB_NAME || 'employees',
   });
@@ -21,7 +21,7 @@ async function runMigrations() {
 
   try {
     await migrate(db, {
-      migrationsFolder: path.join(__dirname, 'migrations'),
+      migrationsFolder: path.join(__dirname, '../drizzle/migrations'),
     });
     console.log('✅ Migration completed successfully!');
   } catch (error) {

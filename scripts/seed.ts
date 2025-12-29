@@ -1,8 +1,8 @@
 import { drizzle } from 'drizzle-orm/mysql2';
 import * as mysql from 'mysql2/promise';
 import * as dotenv from 'dotenv';
-import { employees } from '@modules/employees/employees.schema';
-import { departments } from '@modules/departments/departments.schema';
+import { employees } from '../src/modules/employees/employees.schema';
+import { departments } from '../src/modules/departments/departments.schema';
 
 dotenv.config();
 
@@ -12,7 +12,7 @@ async function seed() {
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '3306'),
-    user: process.env.DB_USER || 'root',
+    user: process.env.DB_USER || 'nhsvlocal',
     password: process.env.DB_PASSWORD || 'Nhsv2025',
     database: process.env.DB_NAME || 'employees',
   });

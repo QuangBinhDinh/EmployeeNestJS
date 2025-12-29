@@ -21,7 +21,7 @@ async function runMigrations() {
 
   try {
     await migrate(db, {
-      migrationsFolder: path.join(__dirname, '../drizzle/migrations'),
+      migrationsFolder: path.join(__dirname, '../database/migrations'),
     });
     console.log('✅ Migration completed successfully!');
   } catch (error) {

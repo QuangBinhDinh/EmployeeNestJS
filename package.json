@@ -15,6 +15,10 @@
     "db:migrate": "drizzle-kit generate && ts-node -r tsconfig-paths/register scripts/migrate.ts",
     "db:seed": "ts-node -r tsconfig-paths/register scripts/seed.ts",
     "db:reset": "ts-node -r tsconfig-paths/register scripts/reset.ts",
+    "db:export": "bash scripts/backup/export.sh",
+    "db:export:structure": "bash scripts/backup/export-structure.sh",
+    "db:export:data": "bash scripts/backup/export-data.sh",
+    "db:import": "npm run db:reset && bash scripts/backup/import.sh",
     "dock": "docker-compose up -d",
     "setup": "npm run db:migrate && npm run db:seed"
   },

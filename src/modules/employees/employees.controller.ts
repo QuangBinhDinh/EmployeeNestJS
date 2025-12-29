@@ -13,7 +13,7 @@ import {
   UseInterceptors,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { EmployeesService } from '@modules/employees/employees.service';
 import { CreateEmployeeRequest, UpdateEmployeeRequest } from '@modules/employees/dto';
 import { ResponseInterceptor } from '@common/interceptors/response.interceptor';
@@ -21,11 +21,11 @@ import { PaginationQueryDto } from '@common/dto/pagination-query.dto';
 import { ApiResponseDto } from '@common/dto/paginated-response.dto';
 import { EntityMapper } from '@common/mappers/entity.mapper';
 import { GetEmployeeResponse } from '@modules/employees/dto/response/get-employee.response';
-import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Employees')
+@ApiBearerAuth('JWT-auth')
 @Controller('employees')
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 @UseInterceptors(ResponseInterceptor)
 export class EmployeesController {
   public constructor(private readonly employeesService: EmployeesService) {}

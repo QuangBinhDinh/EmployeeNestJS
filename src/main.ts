@@ -30,11 +30,34 @@ async function bootstrap() {
     .setTitle('Employee Management API')
     .setDescription('NestJS CRUD API for managing employees and departments with DrizzleORM')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
+    .addTag('Auth', 'Authentication endpoints')
     .addTag('Employees', 'Employee management endpoints')
     .addTag('Departments', 'Department management endpoints')
+    .addTag('Users', 'User management endpoints')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
+
+  // Custom tag sorting: Auth first, then alphabetical
+  if (document.tags) {
+    document.tags.sort((a, b) => {
+      if (a.name === 'Auth') return -1;
+      if (b.name === 'Auth') return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }
+
   SwaggerModule.setup('api', app, document);
 
   const port = process.env.PORT || 3000;

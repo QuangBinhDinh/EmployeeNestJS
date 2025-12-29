@@ -1,9 +1,8 @@
-import { Controller, Post, Body, Get, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseInterceptors } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterRequest, LoginRequest, AuthResponse } from './dto';
 import { CurrentUser } from './decorators/current-user.decorator';
-import { AuthGuard } from './guards/jwt-auth.guard';
 import { Public } from './decorators/public.decorator';
 import { ResponseInterceptor } from '@/common/interceptors/response.interceptor';
 
@@ -28,8 +27,7 @@ export class AuthController {
   }
 
   @Get('profile')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiResponse({ status: 200, description: 'Get current user profile' })
   public async getProfile(@CurrentUser() user: any) {
     return user;

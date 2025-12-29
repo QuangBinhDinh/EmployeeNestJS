@@ -11,7 +11,7 @@ import {
   HttpStatus,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { DepartmentsService } from '@modules/departments/departments.service';
 import {
   CreateDepartmentRequest,
@@ -25,6 +25,7 @@ import { ApiResponseDto } from '@common/dto/paginated-response.dto';
 import { Public } from '@modules/auth/decorators/public.decorator';
 
 @ApiTags('Departments')
+@ApiBearerAuth('JWT-auth')
 @Controller('departments')
 @UseInterceptors(ResponseInterceptor)
 export class DepartmentsController {

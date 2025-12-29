@@ -12,7 +12,7 @@ import {
   HttpStatus,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from '@modules/users/users.service';
 import { CreateUserRequest, UpdateUserRequest } from '@modules/users/dto';
 import { ResponseInterceptor } from '@common/interceptors/response.interceptor';
@@ -22,6 +22,7 @@ import { EntityMapper } from '@common/mappers/entity.mapper';
 import { GetUserResponse } from '@modules/users/dto/response/get-user.response';
 
 @ApiTags('Users')
+@ApiBearerAuth('JWT-auth')
 @Controller('users')
 @UseInterceptors(ResponseInterceptor)
 export class UsersController {

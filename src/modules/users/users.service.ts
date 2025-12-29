@@ -42,10 +42,19 @@ export class UsersService {
     return user;
   }
 
-  public async create(request: CreateUserRequest): Promise<User> {
+  public async create(request: CreateUserRequest | any): Promise<User> {
     try {
-      // Hash password before storing
-      const passwordHash = await bcrypt.hash(request.password, 10);
+      let passwordHash: string;
+
+      // Check if passwordHash is already provided (from auth service)
+      if (request.passwordHash) {
+        passwordHash = request.passwordHash;
+      } else if (request.password) {
+        // Hash password if plain password is provided
+        passwordHash = await bcrypt.hash(request.password, 10);
+      } else {
+        throw new Error('Either password or passwordHash must be provided');
+      }
 
       const userData = {
         username: request.username,
@@ -98,7 +107,15 @@ export class UsersService {
 
       await this.usersRepository.remove(id);
     } catch (e) {
-      handleServiceError(e, 'Failed to delete user');
+      handleServiceError(e, 'Failed to remove user');
     }
+  }
+
+  public async findByUsername(username: string): Promise<User | null> {
+    return this.usersRepository.findByUsername(username);
+  }
+
+  public async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findByEmail(email);
   }
 }

@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { EmployeesService } from '@modules/employees/employees.service';
@@ -20,9 +21,11 @@ import { PaginationQueryDto } from '@common/dto/pagination-query.dto';
 import { ApiResponseDto } from '@common/dto/paginated-response.dto';
 import { EntityMapper } from '@common/mappers/entity.mapper';
 import { GetEmployeeResponse } from '@modules/employees/dto/response/get-employee.response';
+import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Employees')
 @Controller('employees')
+@UseGuards(AuthGuard)
 @UseInterceptors(ResponseInterceptor)
 export class EmployeesController {
   public constructor(private readonly employeesService: EmployeesService) {}
@@ -35,6 +38,7 @@ export class EmployeesController {
     type: ApiResponseDto,
   })
   public async findAll(@Query() query: PaginationQueryDto) {
+    console.log('Get listed employees called');
     const employees = await this.employeesService.findAll(query.pageId, query.pageSize);
     return employees.map(EntityMapper.toEmployeeResponse);
   }

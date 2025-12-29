@@ -7,6 +7,6 @@ import { PaginationMetadata } from '@common/services/pagination-metadata.service
 @Module({
   controllers: [UsersController],
   providers: [UsersService, UsersRepository, PaginationMetadata],
-  exports: [UsersRepository],
+  exports: [UsersService, UsersRepository],
 })
 export class UsersModule {}

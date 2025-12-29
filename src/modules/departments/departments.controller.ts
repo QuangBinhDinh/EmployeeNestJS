@@ -22,6 +22,7 @@ import { EntityMapper } from '@common/mappers/entity.mapper';
 import { ResponseInterceptor } from '@common/interceptors/response.interceptor';
 import { PaginationQueryDto } from '@common/dto/pagination-query.dto';
 import { ApiResponseDto } from '@common/dto/paginated-response.dto';
+import { Public } from '@modules/auth/decorators/public.decorator';
 
 @ApiTags('Departments')
 @Controller('departments')

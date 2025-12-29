@@ -8,10 +8,7 @@ export const DATABASE_CONNECTION = 'DATABASE_CONNECTION';
 const databaseProvider = {
   provide: DATABASE_CONNECTION,
   useFactory: async () => {
-    const connection = await mysql.createConnection({
-      ...databaseConfig,
-      host: 'localhost', // Use localhost to match MySQL user grants
-    });
+    const connection = await mysql.createConnection(databaseConfig);
     return drizzle(connection, { mode: 'default' });
   },
 };

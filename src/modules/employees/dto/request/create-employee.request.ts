@@ -1,16 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsDateString, IsEnum, IsInt, IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsDateString, IsEnum, IsNotEmpty, IsString, Length } from 'class-validator';
 
 export class CreateEmployeeRequest {
-  @IsInt()
-  @IsNotEmpty()
-  @ApiProperty({
-    example: 999999,
-    description: 'Employee number (unique identifier)',
-  })
-  public empNo: number;
-
   @IsDateString()
   @IsNotEmpty()
   @ApiProperty({

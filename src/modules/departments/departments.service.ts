@@ -49,8 +49,8 @@ export class DepartmentsService {
         deptName: request.deptName,
       };
 
-      await this.departmentsRepository.create(departmentData);
-      return this.findOne(request.deptNo);
+      const createdRow = await this.departmentsRepository.create(departmentData);
+      return createdRow;
     } catch (e) {
       handleServiceError(e, 'Failed to create department');
     }
@@ -58,12 +58,8 @@ export class DepartmentsService {
 
   public async update(deptNo: string, request: UpdateDepartmentRequest): Promise<Department> {
     try {
-      const affectedRows = await this.departmentsRepository.update(deptNo, request);
-
-      if (affectedRows === 0) {
-        throw new NotFoundError(`Department with ID ${deptNo}`);
-      }
-      return this.findOne(deptNo);
+      const updatedRow = await this.departmentsRepository.update(deptNo, request);
+      return updatedRow;
     } catch (e) {
       handleServiceError(e, 'Failed to update department');
     }

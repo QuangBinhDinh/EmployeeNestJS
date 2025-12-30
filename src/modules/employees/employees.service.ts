@@ -5,12 +5,14 @@ import { DEFAULT_PAGE_SIZE } from '@common/constants/pagination.constants';
 import { Employee } from '@modules/employees/employees.schema';
 import { NotFoundError, handleServiceError } from '@common/exceptions';
 import { PaginationMetadata } from '@common/services/pagination-metadata.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class EmployeesService {
   public constructor(
     private readonly employeesRepository: EmployeesRepository,
     private readonly paginationMetadata: PaginationMetadata,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   public async findAll(pageId?: number, pageSize?: number): Promise<Employee[]> {
@@ -44,7 +46,7 @@ export class EmployeesService {
   public async create(request: CreateEmployeeRequest): Promise<Employee> {
     try {
       const employeeData = {
-        empNo: request.empNo,
+        empNo: Date.now(),
         birthDate: new Date(request.birthDate),
         firstName: request.firstName,
         lastName: request.lastName,
@@ -52,8 +54,16 @@ export class EmployeesService {
         hireDate: new Date(request.hireDate),
       };
 
-      await this.employeesRepository.create(employeeData);
-      return this.findOne(request.empNo);
+      const newEmployee = await this.employeesRepository.create(employeeData);
+      if (!newEmployee) {
+        throw new NotFoundError('Employee creation failed');
+      }
+
+      this.eventEmitter.emit('send-mail', {
+        title: 'New Employee Created',
+        description: `Employee ${request.firstName} ${request.lastName} has been created.`,
+      });
+      return newEmployee;
     } catch (e) {
       handleServiceError(e, 'Failed to create employee');
     }
@@ -79,13 +89,11 @@ export class EmployeesService {
         updateData.hireDate = new Date(request.hireDate);
       }
 
-      const affectedRows = await this.employeesRepository.update(empNo, updateData);
-
-      if (affectedRows === 0) {
+      const updateRow = await this.employeesRepository.update(empNo, updateData);
+      if (!updateRow) {
         throw new NotFoundError(`Employee with ID ${empNo}`);
       }
-
-      return this.findOne(empNo);
+      return updateRow;
     } catch (e) {
       handleServiceError(e, 'Failed to update employee');
     }

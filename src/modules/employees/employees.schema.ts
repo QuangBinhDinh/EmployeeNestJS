@@ -1,7 +1,8 @@
 import { mysqlTable, int, varchar, date, mysqlEnum } from 'drizzle-orm/mysql-core';
 
 export const employees = mysqlTable('employees', {
-  empNo: int('emp_no').primaryKey().notNull(),
+  id: int('id').primaryKey().notNull().autoincrement(),
+  empNo: int('emp_no').notNull().unique(),
   birthDate: date('birth_date').notNull(),
   firstName: varchar('first_name', { length: 14 }).notNull(),
   lastName: varchar('last_name', { length: 16 }).notNull(),

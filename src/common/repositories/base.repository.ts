@@ -21,28 +21,45 @@ export abstract class BaseRepository<T extends MySqlTableWithColumns<any>> {
     return result[0].count;
   }
 
-  public async findOne(id: unknown): Promise<InferSelectModel<T> | null> {
+  public async findOne(id: string | number): Promise<InferSelectModel<T> | null> {
     const primaryKey = this.getPrimaryKey();
     const result = await this.db.select().from(this.table).where(eq(primaryKey, id)).limit(1);
     return result.length > 0 ? (result[0] as InferSelectModel<T>) : null;
   }
 
-  public async create(data: InferInsertModel<T>): Promise<void> {
-    await this.db.insert(this.table).values(data);
+  public async create(data: InferInsertModel<T>): Promise<InferSelectModel<T>> {
+    const newData = this.tranformDataInput(data);
+    console.log('New Data:', newData);
+    const result = await this.db.insert(this.table).values(newData);
+    const insertedId = result[0].insertId;
+    return await this.findOne(insertedId);
   }
 
-  public async update(id: unknown, data: Partial<InferInsertModel<T>>): Promise<number> {
+  public async update(
+    id: string | number,
+    data: Partial<InferInsertModel<T>>,
+  ): Promise<InferSelectModel<T> | null> {
     const primaryKey = this.getPrimaryKey();
-    const result = await this.db.update(this.table).set(data).where(eq(primaryKey, id));
-
-    return result[0].affectedRows;
+    const newData = this.tranformDataInput(data);
+    await this.db.update(this.table).set(newData).where(eq(primaryKey, id));
+    return await this.findOne(id);
   }
 
-  public async remove(id: unknown): Promise<number> {
+  public async remove(id: string | number): Promise<number> {
     const primaryKey = this.getPrimaryKey();
     const result = await this.db.delete(this.table).where(eq(primaryKey, id));
 
     return result[0].affectedRows;
+  }
+
+  protected tranformDataInput<D extends Record<string, any>>(data: D): D {
+    const transformed: any = { ...data };
+    for (const key in transformed) {
+      if (transformed[key] instanceof Date) {
+        transformed[key] = transformed[key].toISOString().split('T')[0];
+      }
+    }
+    return transformed as D;
   }
 
   protected abstract getPrimaryKey(): MySqlColumn;

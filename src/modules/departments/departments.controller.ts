@@ -27,7 +27,7 @@ import { Roles, Role } from '@/common/roles';
 @ApiTags('Departments')
 @ApiBearerAuth('JWT-auth')
 @Controller('departments')
-@Roles(Role.Admin)
+// @Roles(Role.Admin)
 @UseInterceptors(ResponseInterceptor)
 export class DepartmentsController {
   public constructor(private readonly departmentsService: DepartmentsService) {}

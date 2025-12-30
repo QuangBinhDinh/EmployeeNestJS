@@ -22,11 +22,12 @@ import { EntityMapper } from '@common/mappers/entity.mapper';
 import { ResponseInterceptor } from '@common/interceptors/response.interceptor';
 import { PaginationQueryDto } from '@common/dto/pagination-query.dto';
 import { ApiResponseDto } from '@common/dto/paginated-response.dto';
-import { Public } from '@modules/auth/decorators/public.decorator';
+import { Roles, Role } from '@/common/roles';
 
 @ApiTags('Departments')
 @ApiBearerAuth('JWT-auth')
 @Controller('departments')
+@Roles(Role.Admin)
 @UseInterceptors(ResponseInterceptor)
 export class DepartmentsController {
   public constructor(private readonly departmentsService: DepartmentsService) {}

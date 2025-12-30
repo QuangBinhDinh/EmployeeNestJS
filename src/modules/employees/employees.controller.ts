@@ -11,7 +11,6 @@ import {
   HttpCode,
   HttpStatus,
   UseInterceptors,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { EmployeesService } from '@modules/employees/employees.service';
@@ -25,7 +24,6 @@ import { GetEmployeeResponse } from '@modules/employees/dto/response/get-employe
 @ApiTags('Employees')
 @ApiBearerAuth('JWT-auth')
 @Controller('employees')
-// @UseGuards(AuthGuard)
 @UseInterceptors(ResponseInterceptor)
 export class EmployeesController {
   public constructor(private readonly employeesService: EmployeesService) {}

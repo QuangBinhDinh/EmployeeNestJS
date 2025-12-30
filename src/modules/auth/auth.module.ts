@@ -8,6 +8,7 @@ import { jwtConstants } from '@/constants';
 import { AuthGuard } from './guards/jwt-auth.guard';
 import { PassportModule } from '@nestjs/passport';
 import { PaginationMetadata } from '@/common/services/pagination-metadata.service';
+import { RolesGuard } from '@/common/roles/role.guard';
 
 @Module({
   imports: [
@@ -23,6 +24,10 @@ import { PaginationMetadata } from '@/common/services/pagination-metadata.servic
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
     PaginationMetadata,
   ],

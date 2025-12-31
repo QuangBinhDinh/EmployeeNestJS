@@ -1,4 +1,4 @@
-import { Employee } from '@modules/employees/employees.schema';
+import { Employee } from '@modules/employees';
 import { Department } from '@modules/departments/departments.schema';
 import { User } from '@modules/users/users.schema';
 import { GetEmployeeResponse } from '@modules/employees/dto/response/get-employee.response';
@@ -45,7 +45,6 @@ export class EntityMapper {
   }
 
   public static toUserResponse(user: User): GetUserResponse {
-    // Exclude sensitive password hash from response
     return EntityMapper.toResponse<User, GetUserResponse>(user, ['passwordHash']);
   }
 }

@@ -6,7 +6,6 @@ import { UsersModule } from '../users/users.module';
 import { APP_GUARD } from '@nestjs/core';
 import { jwtConstants } from '@/constants';
 import { AuthGuard } from './guards/jwt-auth.guard';
-import { PassportModule } from '@nestjs/passport';
 import { PaginationMetadata } from '@/common/services/pagination-metadata.service';
 import { RolesGuard } from '@/common/roles/role.guard';
 

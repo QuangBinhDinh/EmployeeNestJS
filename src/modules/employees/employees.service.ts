@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EmployeesRepository } from '@modules/employees/employees.repository';
 import { CreateEmployeeRequest, UpdateEmployeeRequest } from '@modules/employees/dto';
-import { DEFAULT_PAGE_SIZE } from '@common/constants/pagination.constants';
-import { Employee } from '@modules/employees/employees.schema';
+import { Employee } from '@modules/employees';
 import { NotFoundError, handleServiceError } from '@common/exceptions';
 import { PaginationMetadata } from '@common/services/pagination-metadata.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -17,21 +16,17 @@ export class EmployeesService {
 
   public async findAll(pageId?: number, pageSize?: number): Promise<Employee[]> {
     // If pagination params are provided
+    let pagination: { limit: number; offset: number } | undefined = undefined;
     if (pageId !== undefined && pageSize !== undefined) {
-      const offset = (pageId - 1) * pageSize;
-      const [employees, totalCount] = await Promise.all([
-        this.employeesRepository.findAll(pageSize, offset),
-        this.employeesRepository.count(),
-      ]);
-
-      // Set metadata for interceptor to use
+      const totalCount = await this.employeesRepository.count();
+      pagination = {
+        limit: pageSize,
+        offset: (pageId - 1) * pageSize,
+      };
       this.paginationMetadata.setTotalCount(totalCount);
-
-      return employees;
     }
 
-    // Default behavior without pagination
-    return this.employeesRepository.findAll(DEFAULT_PAGE_SIZE, 0);
+    return this.employeesRepository.findAll(pagination);
   }
 
   public async findOne(empNo: number): Promise<Employee> {
@@ -109,6 +104,16 @@ export class EmployeesService {
       }
     } catch (e) {
       handleServiceError(e, 'Failed to delete employee');
+    }
+  }
+
+  public async findByGender(gender: 'M' | 'F'): Promise<Employee[]> {
+    try {
+      return this.employeesRepository.findByCondition({
+        gender,
+      });
+    } catch (e) {
+      handleServiceError(e, 'Failed to find employees by gender');
     }
   }
 

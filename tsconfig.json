@@ -24,7 +24,8 @@
       "@common/*": ["src/common/*"],
       "@config/*": ["src/database/*"],
       "@config": ["src/database"],
-      "@db/*": ["src/db/*"]
+      "@db/*": ["src/db/*"],
+      "@utils/*": ["src/utils/*"]
     }
   },
   "include": ["src/**/*", "drizzle/**/*", "drizzle.config.ts"],

@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { GlobalExceptionFilter } from '@common/filters/global-exception.filter';
+import { ValidationError } from './common/exceptions';
 
 dotenv.config();
 
@@ -22,6 +23,14 @@ async function bootstrap() {
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
+      exceptionFactory: (errors) => {
+        const constraints = errors[0].constraints;
+        let message = 'Validation failed: ';
+        if (constraints) {
+          message += Object.values(constraints)[0];
+        }
+        return new ValidationError(message);
+      },
     }),
   );
 

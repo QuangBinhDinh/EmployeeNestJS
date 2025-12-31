@@ -1,6 +1,7 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsDateString, IsEnum, IsOptional, IsString, Length } from 'class-validator';
+import { IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
+import { GenderEnum } from '../../employees.type';
 
 export class UpdateEmployeeRequest {
   @IsDateString()
@@ -31,14 +32,10 @@ export class UpdateEmployeeRequest {
   })
   public lastName?: string;
 
-  @IsEnum(['M', 'F'])
+  @IsEnum(GenderEnum, { message: 'gender must be M or F' })
   @IsOptional()
-  @ApiPropertyOptional({
-    example: 'M',
-    description: 'Gender (M or F)',
-    enum: ['M', 'F'],
-  })
-  public gender?: 'M' | 'F';
+  @ApiPropertyOptional({ enum: GenderEnum, example: GenderEnum.MALE })
+  public gender?: GenderEnum;
 
   @IsDateString()
   @IsOptional()

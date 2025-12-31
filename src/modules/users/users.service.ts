@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UsersRepository } from '@modules/users/users.repository';
 import { CreateUserRequest, UpdateUserRequest } from '@modules/users/dto';
-import { DEFAULT_PAGE_SIZE } from '@common/constants/pagination.constants';
 import { User } from '@modules/users/users.schema';
 import { NotFoundError, handleServiceError } from '@common/exceptions';
 import { PaginationMetadata } from '@common/services/pagination-metadata.service';
@@ -16,21 +15,18 @@ export class UsersService {
 
   public async findAll(pageId?: number, pageSize?: number): Promise<User[]> {
     // If pagination params are provided
+    let pagination: { limit: number; offset: number } | undefined = undefined;
     if (pageId !== undefined && pageSize !== undefined) {
-      const offset = (pageId - 1) * pageSize;
-      const [users, totalCount] = await Promise.all([
-        this.usersRepository.findAll(pageSize, offset),
-        this.usersRepository.count(),
-      ]);
-
-      // Set metadata for interceptor to use
+      const totalCount = await this.usersRepository.count();
+      pagination = {
+        limit: pageSize,
+        offset: (pageId - 1) * pageSize,
+      };
       this.paginationMetadata.setTotalCount(totalCount);
-
-      return users;
     }
 
     // Default behavior without pagination
-    return this.usersRepository.findAll(DEFAULT_PAGE_SIZE, 0);
+    return this.usersRepository.findAll(pagination);
   }
 
   public async findOne(id: number): Promise<User> {

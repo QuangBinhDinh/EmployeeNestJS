@@ -11,7 +11,3 @@ export const employees = mysqlTable('employees', {
   hireDate: date('hire_date').notNull(),
   ...timestampColumns,
 });
-
-// TypeScript interfaces
-export type Employee = typeof employees.$inferSelect;
-export type NewEmployee = typeof employees.$inferInsert;

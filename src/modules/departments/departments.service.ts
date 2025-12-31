@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DepartmentsRepository } from '@modules/departments/departments.repository';
 import { CreateDepartmentRequest, UpdateDepartmentRequest } from '@modules/departments/dto';
-import { DEFAULT_PAGE_SIZE } from '@common/constants/pagination.constants';
 import { Department } from '@modules/departments/departments.schema';
 import { NotFoundError, handleServiceError } from '@common/exceptions';
 import { PaginationMetadata } from '@common/services/pagination-metadata.service';
@@ -15,21 +14,18 @@ export class DepartmentsService {
 
   public async findAll(pageId?: number, pageSize?: number): Promise<Department[]> {
     // If pagination params are provided
+    let pagination: { limit: number; offset: number } | undefined = undefined;
     if (pageId !== undefined && pageSize !== undefined) {
-      const offset = (pageId - 1) * pageSize;
-      const [departments, totalCount] = await Promise.all([
-        this.departmentsRepository.findAll(pageSize, offset),
-        this.departmentsRepository.count(),
-      ]);
-
-      // Set metadata for interceptor to use
+      const totalCount = await this.departmentsRepository.count();
+      pagination = {
+        limit: pageSize,
+        offset: (pageId - 1) * pageSize,
+      };
       this.paginationMetadata.setTotalCount(totalCount);
-
-      return departments;
     }
 
     // Default behavior without pagination
-    return this.departmentsRepository.findAll(DEFAULT_PAGE_SIZE, 0);
+    return this.departmentsRepository.findAll(pagination);
   }
 
   public async findOne(deptNo: string): Promise<Department> {

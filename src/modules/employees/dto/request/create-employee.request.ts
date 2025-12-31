@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsDateString, IsEnum, IsNotEmpty, IsString, Length } from 'class-validator';
+import { GenderEnum } from '../../employees.type';
 
 export class CreateEmployeeRequest {
   @IsDateString()
@@ -31,14 +32,10 @@ export class CreateEmployeeRequest {
   })
   public lastName: string;
 
-  @IsEnum(['M', 'F'])
+  @IsEnum(GenderEnum, { message: 'gender must be M or F' })
   @IsNotEmpty()
-  @ApiProperty({
-    example: 'M',
-    description: 'Gender (M or F)',
-    enum: ['M', 'F'],
-  })
-  public gender: 'M' | 'F';
+  @ApiProperty({ enum: GenderEnum, example: GenderEnum.MALE })
+  public gender: GenderEnum;
 
   @IsDateString()
   @IsNotEmpty()

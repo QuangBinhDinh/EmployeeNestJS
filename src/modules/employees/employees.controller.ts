@@ -14,7 +14,11 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { EmployeesService } from '@modules/employees/employees.service';
-import { CreateEmployeeRequest, UpdateEmployeeRequest } from '@modules/employees/dto';
+import {
+  CreateEmployeeRequest,
+  UpdateEmployeeRequest,
+  FindByGenderQueryDto,
+} from '@modules/employees/dto';
 import { ResponseInterceptor } from '@common/interceptors/response.interceptor';
 import { PaginationQueryDto } from '@common/dto/pagination-query.dto';
 import { ApiResponseDto } from '@common/dto/paginated-response.dto';
@@ -39,6 +43,14 @@ export class EmployeesController {
     console.log('Get listed employees called');
     const employees = await this.employeesService.findAll(query.pageId, query.pageSize);
     return employees.map(EntityMapper.toEmployeeResponse);
+  }
+
+  @Get('find-gender')
+  @ApiOperation({ summary: 'Get employees by gender' })
+  @ApiResponse({ status: 200, description: 'Employee details' })
+  public async findByGender(@Query() query: FindByGenderQueryDto): Promise<GetEmployeeResponse[]> {
+    const employee = await this.employeesService.findByGender(query.gender);
+    return employee.map(EntityMapper.toEmployeeResponse);
   }
 
   @Get(':id')

@@ -1,6 +1,7 @@
 import { MySql2Database } from 'drizzle-orm/mysql2';
-import { eq, count } from 'drizzle-orm';
+import { eq, count, and } from 'drizzle-orm';
 import { MySqlTableWithColumns, MySqlColumn } from 'drizzle-orm/mysql-core';
+import { DEFAULT_QUERY_LIMIT } from '../constants/pagination.constants';
 
 type InferSelectModel<T> = T extends MySqlTableWithColumns<any> ? T['$inferSelect'] : never;
 type InferInsertModel<T> = T extends MySqlTableWithColumns<any> ? T['$inferInsert'] : never;
@@ -13,6 +14,14 @@ export abstract class BaseRepository<T extends MySqlTableWithColumns<any>> {
     protected readonly table: T,
   ) {
     this.primaryKeyColumn = this.getPrimaryKey();
+  }
+
+  /**
+   * Get Drizzle columns map for the current table.
+   */
+  protected getColumns(): Record<string, MySqlColumn> {
+    const table = this.table as any;
+    return (table[Symbol.for('drizzle:Columns')] as Record<string, MySqlColumn>) || table;
   }
 
   protected getPrimaryKey(): MySqlColumn | null {
@@ -32,7 +41,12 @@ export abstract class BaseRepository<T extends MySqlTableWithColumns<any>> {
     return null;
   }
 
-  public async findAll(limit: number, offset: number): Promise<InferSelectModel<T>[]> {
+  public async findAll(pagination?: {
+    limit: number;
+    offset: number;
+  }): Promise<InferSelectModel<T>[]> {
+    const limit = pagination?.limit ?? DEFAULT_QUERY_LIMIT;
+    const offset = pagination?.offset ?? 0;
     const result = await this.db.select().from(this.table).limit(limit).offset(offset);
     return result as InferSelectModel<T>[];
   }
@@ -47,8 +61,6 @@ export abstract class BaseRepository<T extends MySqlTableWithColumns<any>> {
       throw new Error('Primary key not found for table');
     }
 
-    // console.log('Primary Key:', this.primaryKeyColumn);
-    // console.log('ID:', id);
     const result = await this.db
       .select()
       .from(this.table)
@@ -59,7 +71,6 @@ export abstract class BaseRepository<T extends MySqlTableWithColumns<any>> {
 
   public async create(data: InferInsertModel<T>): Promise<InferSelectModel<T>> {
     const newData = this.tranformDataInput(data);
-    console.log('New Data:', newData);
     const result = await this.db.insert(this.table).values(newData);
     const insertedId = result[0].insertId;
 
@@ -86,6 +97,44 @@ export abstract class BaseRepository<T extends MySqlTableWithColumns<any>> {
 
     const result = await this.db.delete(this.table).where(eq(this.primaryKeyColumn, id));
     return result[0].affectedRows;
+  }
+
+  /**
+   * Find rows by a set of conditions
+   */
+  public async findByCondition(
+    condition: Partial<InferSelectModel<T>>,
+    pagination?: { limit: number; offset: number },
+  ): Promise<InferSelectModel<T>[]> {
+    const entries = Object.entries(condition ?? {}) as Array<[keyof InferSelectModel<T>, unknown]>;
+    const limit = pagination?.limit ?? DEFAULT_QUERY_LIMIT;
+    const offset = pagination?.offset ?? 0;
+
+    // Require at least one condition
+    if (entries.length === 0) {
+      throw new Error('findByCondition requires at least one field');
+    }
+
+    const columns = this.getColumns();
+    const predicates: ReturnType<typeof eq>[] = [];
+
+    for (const [key, value] of entries) {
+      const column = columns[key as string];
+      if (!column) {
+        throw new Error(`Column "${String(key)}" does not exist on table`);
+      }
+      predicates.push(eq(column, value));
+    }
+
+    const whereClause = predicates.reduce((acc, curr) => (acc ? and(acc, curr) : curr));
+
+    const result = await this.db
+      .select()
+      .from(this.table)
+      .where(whereClause)
+      .limit(limit)
+      .offset(offset);
+    return result as InferSelectModel<T>[];
   }
 
   protected tranformDataInput<D extends Record<string, any>>(data: D): D {

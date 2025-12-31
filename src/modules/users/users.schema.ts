@@ -1,4 +1,5 @@
-import { mysqlTable, bigint, varchar, timestamp } from 'drizzle-orm/mysql-core';
+import { mysqlTable, bigint, varchar } from 'drizzle-orm/mysql-core';
+import { timestampColumns } from '@/database/helper';
 
 export const users = mysqlTable('users', {
   id: bigint('id', { mode: 'number' }).primaryKey().autoincrement(),
@@ -7,8 +8,7 @@ export const users = mysqlTable('users', {
   email: varchar('email', { length: 255 }).notNull().unique(),
   phone: varchar('phone', { length: 20 }),
   fullName: varchar('full_name', { length: 100 }),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
+  ...timestampColumns,
 });
 
 // TypeScript interfaces

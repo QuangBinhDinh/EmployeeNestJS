@@ -12,8 +12,4 @@ export class DepartmentsRepository extends BaseRepository<typeof departments> {
   ) {
     super(db, departments);
   }
-
-  protected getPrimaryKey() {
-    return departments.deptNo;
-  }
 }

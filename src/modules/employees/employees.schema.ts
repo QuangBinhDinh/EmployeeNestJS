@@ -1,13 +1,15 @@
+import { timestampColumns } from '@/database/helper';
 import { mysqlTable, int, varchar, date, mysqlEnum } from 'drizzle-orm/mysql-core';
 
 export const employees = mysqlTable('employees', {
   id: int('id').primaryKey().notNull().autoincrement(),
-  empNo: int('emp_no').notNull().unique(),
+  empNo: int('emp_no').notNull(),
   birthDate: date('birth_date').notNull(),
   firstName: varchar('first_name', { length: 14 }).notNull(),
   lastName: varchar('last_name', { length: 16 }).notNull(),
   gender: mysqlEnum('gender', ['M', 'F']).notNull(),
   hireDate: date('hire_date').notNull(),
+  ...timestampColumns,
 });
 
 // TypeScript interfaces

@@ -18,4 +18,10 @@ export class GetEmployeeResponse {
 
   @ApiProperty({ example: '1986-06-26', description: 'Hire date' })
   public hireDate: string;
+
+  @ApiProperty({ example: '2024-01-15T10:30:00.000Z', description: 'Creation timestamp' })
+  public createdAt: string;
+
+  @ApiProperty({ example: '2024-01-20T15:45:00.000Z', description: 'Last update timestamp' })
+  public updatedAt: string;
 }

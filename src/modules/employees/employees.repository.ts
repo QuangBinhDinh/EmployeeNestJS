@@ -12,8 +12,4 @@ export class EmployeesRepository extends BaseRepository<typeof employees> {
   ) {
     super(db, employees);
   }
-
-  protected getPrimaryKey() {
-    return employees.empNo;
-  }
 }

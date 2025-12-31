@@ -7,7 +7,7 @@ export class LoginRequest {
   @IsNotEmpty()
   public username: string;
 
-  @ApiProperty({ example: 'SecurePass123!' })
+  @ApiProperty({ example: 'John@123' })
   @IsString()
   @IsNotEmpty()
   public password: string;

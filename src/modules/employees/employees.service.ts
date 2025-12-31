@@ -45,8 +45,9 @@ export class EmployeesService {
 
   public async create(request: CreateEmployeeRequest): Promise<Employee> {
     try {
+      const empNo = await this.generateEmpNo();
       const employeeData = {
-        empNo: Date.now(),
+        empNo,
         birthDate: new Date(request.birthDate),
         firstName: request.firstName,
         lastName: request.lastName,
@@ -109,5 +110,10 @@ export class EmployeesService {
     } catch (e) {
       handleServiceError(e, 'Failed to delete employee');
     }
+  }
+
+  private async generateEmpNo(): Promise<number> {
+    const count = await this.employeesRepository.count();
+    return 10001 + count;
   }
 }

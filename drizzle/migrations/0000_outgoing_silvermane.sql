@@ -1,18 +1,24 @@
 CREATE TABLE `departments` (
+	`id` int AUTO_INCREMENT NOT NULL,
 	`dept_no` char(4) NOT NULL,
 	`dept_name` varchar(40) NOT NULL,
-	CONSTRAINT `departments_dept_no` PRIMARY KEY(`dept_no`),
-	CONSTRAINT `departments_dept_name_unique` UNIQUE(`dept_name`)
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `departments_id` PRIMARY KEY(`id`),
+	CONSTRAINT `departments_dept_no_unique` UNIQUE(`dept_no`)
 );
 --> statement-breakpoint
 CREATE TABLE `employees` (
+	`id` int AUTO_INCREMENT NOT NULL,
 	`emp_no` int NOT NULL,
 	`birth_date` date NOT NULL,
 	`first_name` varchar(14) NOT NULL,
 	`last_name` varchar(16) NOT NULL,
 	`gender` enum('M','F') NOT NULL,
 	`hire_date` date NOT NULL,
-	CONSTRAINT `employees_emp_no` PRIMARY KEY(`emp_no`)
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `employees_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
 CREATE TABLE `users` (
@@ -22,8 +28,8 @@ CREATE TABLE `users` (
 	`email` varchar(255) NOT NULL,
 	`phone` varchar(20),
 	`full_name` varchar(100),
-	`created_at` timestamp NOT NULL DEFAULT (now()),
-	`updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `users_id` PRIMARY KEY(`id`),
 	CONSTRAINT `users_username_unique` UNIQUE(`username`),
 	CONSTRAINT `users_email_unique` UNIQUE(`email`)

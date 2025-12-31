@@ -1,12 +1,19 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "800e348d-bdd3-40c4-a0a3-cb4d6e6ccfe8",
+  "id": "bf202314-8170-4e8e-8c3c-b3ea27e37cc2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "departments": {
       "name": "departments",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
         "dept_no": {
           "name": "dept_no",
           "type": "char(4)",
@@ -20,23 +27,39 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "departments_dept_no": {
-          "name": "departments_dept_no",
+        "departments_id": {
+          "name": "departments_id",
           "columns": [
-            "dept_no"
+            "id"
           ]
         }
       },
       "uniqueConstraints": {
-        "departments_dept_name_unique": {
-          "name": "departments_dept_name_unique",
+        "departments_dept_no_unique": {
+          "name": "departments_dept_no_unique",
           "columns": [
-            "dept_name"
+            "dept_no"
           ]
         }
       },
@@ -45,6 +68,13 @@
     "employees": {
       "name": "employees",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
         "emp_no": {
           "name": "emp_no",
           "type": "int",
@@ -86,15 +116,31 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "employees_emp_no": {
-          "name": "employees_emp_no",
+        "employees_id": {
+          "name": "employees_id",
           "columns": [
-            "emp_no"
+            "id"
           ]
         }
       },
@@ -152,7 +198,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(now())"
+          "default": "CURRENT_TIMESTAMP"
         },
         "updated_at": {
           "name": "updated_at",
@@ -160,8 +206,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "onUpdate": true,
-          "default": "(now())"
+          "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
         }
       },
       "indexes": {},

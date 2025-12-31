@@ -71,6 +71,17 @@ export class EmployeesController {
     return EntityMapper.toEmployeeResponse(employee);
   }
 
+  @Put('transaction/:empNo')
+  @ApiOperation({ summary: 'Update employee with transaction' })
+  @ApiResponse({ status: 200, description: 'Employee updated successfully' })
+  public async updateTransaction(
+    @Param('empNo', ParseIntPipe) empNo: number,
+    @Body() updateEmployeeRequest: UpdateEmployeeRequest,
+  ): Promise<GetEmployeeResponse> {
+    const employee = await this.employeesService.updateTransaction(empNo, updateEmployeeRequest);
+    return EntityMapper.toEmployeeResponse(employee);
+  }
+
   @Put(':id')
   @ApiOperation({ summary: 'Update employee' })
   @ApiResponse({ status: 200, description: 'Employee updated successfully' })

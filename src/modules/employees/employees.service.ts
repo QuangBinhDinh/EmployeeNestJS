@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { eq } from 'drizzle-orm';
+import { MySql2Database } from 'drizzle-orm/mysql2';
 import { EmployeesRepository } from '@modules/employees/employees.repository';
 import { CreateEmployeeRequest, UpdateEmployeeRequest } from '@modules/employees/dto';
 import { Employee } from '@modules/employees';
 import { NotFoundError, handleServiceError } from '@common/exceptions';
 import { PaginationMetadata } from '@common/services/pagination-metadata.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { DepartmentsRepository } from '../departments/departments.repository';
+import { employees } from './employees.schema';
+import { departments } from '@modules/departments/departments.schema';
+import { DATABASE_CONNECTION } from '@/database';
 
 @Injectable()
 export class EmployeesService {
@@ -12,6 +18,8 @@ export class EmployeesService {
     private readonly employeesRepository: EmployeesRepository,
     private readonly paginationMetadata: PaginationMetadata,
     private readonly eventEmitter: EventEmitter2,
+    private readonly departmentsRepository: DepartmentsRepository,
+    @Inject(DATABASE_CONNECTION) private readonly db: MySql2Database,
   ) {}
 
   public async findAll(pageId?: number, pageSize?: number): Promise<Employee[]> {
@@ -114,6 +122,57 @@ export class EmployeesService {
       });
     } catch (e) {
       handleServiceError(e, 'Failed to find employees by gender');
+    }
+  }
+
+  public async updateTransaction(empNo: number, request: UpdateEmployeeRequest): Promise<Employee> {
+    try {
+      return await this.db.transaction(async (tx) => {
+        const updateData: Partial<Employee> = {};
+        if (request.birthDate) {
+          updateData.birthDate = new Date(request.birthDate);
+        }
+        if (request.firstName) {
+          updateData.firstName = request.firstName;
+        }
+        if (request.lastName) {
+          updateData.lastName = request.lastName;
+        }
+        if (request.gender) {
+          updateData.gender = request.gender;
+        }
+        if (request.hireDate) {
+          updateData.hireDate = new Date(request.hireDate);
+        }
+
+        // Update employee
+        await tx
+          .update(employees)
+          .set(updateData as any)
+          .where(eq(employees.empNo, empNo))
+          .limit(1);
+
+        const updatedEmployee = await tx
+          .select()
+          .from(employees)
+          .where(eq(employees.empNo, empNo))
+          .limit(1);
+
+        if (!updatedEmployee.length) {
+          throw new NotFoundError(`Employee with ID ${empNo}`);
+        }
+
+        // Example department update inside the same transaction
+        await tx
+          .update(departments)
+          .set({ deptName: 'Data Science: ' + empNo.toString() })
+          .where(eq(departments.deptNo, 'd009'))
+          .limit(1);
+
+        return updatedEmployee[0];
+      });
+    } catch (e) {
+      handleServiceError(e, 'Failed to update employee');
     }
   }
 

@@ -3,10 +3,12 @@ import { EmployeesController } from '@modules/employees/employees.controller';
 import { EmployeesService } from '@modules/employees/employees.service';
 import { EmployeesRepository } from '@modules/employees/employees.repository';
 import { PaginationMetadata } from '@common/services/pagination-metadata.service';
+import { DepartmentsRepository } from '../departments/departments.repository';
 
 @Module({
+  // imports: [DepartmentsRepository],
   controllers: [EmployeesController],
-  providers: [EmployeesService, EmployeesRepository, PaginationMetadata],
+  providers: [EmployeesService, EmployeesRepository, PaginationMetadata, DepartmentsRepository],
   exports: [EmployeesRepository],
 })
 export class EmployeesModule {}

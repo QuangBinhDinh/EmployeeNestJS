@@ -1,6 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
+import { IsDateString, IsEnum, IsOptional, IsString, Length } from 'class-validator';
 import { GenderEnum } from '../../employees.type';
 
 export class UpdateEmployeeRequest {

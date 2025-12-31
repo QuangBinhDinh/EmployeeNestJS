@@ -106,7 +106,7 @@ export abstract class BaseRepository<T extends MySqlTableWithColumns<any>> {
     condition: Partial<InferSelectModel<T>>,
     pagination?: { limit: number; offset: number },
   ): Promise<InferSelectModel<T>[]> {
-    const entries = Object.entries(condition ?? {}) as Array<[keyof InferSelectModel<T>, unknown]>;
+    const entries = Object.entries(condition) as Array<[keyof InferSelectModel<T>, unknown]>;
     const limit = pagination?.limit ?? DEFAULT_QUERY_LIMIT;
     const offset = pagination?.offset ?? 0;
 
@@ -135,6 +135,42 @@ export abstract class BaseRepository<T extends MySqlTableWithColumns<any>> {
       .limit(limit)
       .offset(offset);
     return result as InferSelectModel<T>[];
+  }
+
+  /**
+   * Update exactly one record by condition and return the updated row.
+   */
+  public async updateOneByCondition(
+    condition: Partial<InferSelectModel<T>>,
+    data: Partial<InferInsertModel<T>>,
+  ): Promise<InferSelectModel<T> | null> {
+    const entries = Object.entries(condition) as Array<[keyof InferSelectModel<T>, unknown]>;
+    if (entries.length === 0) {
+      throw new Error('updateOneByCondition requires at least one field in condition');
+    }
+    if (Object.keys(data).length === 0) {
+      throw new Error('updateOneByCondition requires at least one field to update');
+    }
+
+    const columns = this.getColumns();
+    const predicates: ReturnType<typeof eq>[] = [];
+
+    for (const [key, value] of entries) {
+      const column = columns[key as string];
+      if (!column) {
+        throw new Error(`Column "${String(key)}" does not exist on table`);
+      }
+      predicates.push(eq(column, value));
+    }
+
+    const whereClause = predicates.reduce((acc, curr) => (acc ? and(acc, curr) : curr));
+
+    const transformedData = this.tranformDataInput(data) as Partial<InferInsertModel<T>>;
+
+    await this.db.update(this.table).set(transformedData).where(whereClause).limit(1);
+
+    const updated = await this.db.select().from(this.table).where(whereClause).limit(1);
+    return updated.length > 0 ? (updated[0] as InferSelectModel<T>) : null;
   }
 
   protected tranformDataInput<D extends Record<string, any>>(data: D): D {

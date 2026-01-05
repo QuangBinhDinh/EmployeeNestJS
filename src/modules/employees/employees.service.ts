@@ -8,8 +8,6 @@ import { NotFoundError, handleServiceError } from '@common/exceptions';
 import { PaginationMetadata } from '@common/services/pagination-metadata.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DepartmentsRepository } from '../departments/departments.repository';
-import { employees } from './employees.schema';
-import { departments } from '@modules/departments/departments.schema';
 import { DATABASE_CONNECTION } from '@/database';
 
 @Injectable()
@@ -146,30 +144,23 @@ export class EmployeesService {
         }
 
         // Update employee
-        await tx
-          .update(employees)
-          .set(updateData as any)
-          .where(eq(employees.empNo, empNo))
-          .limit(1);
-
-        const updatedEmployee = await tx
-          .select()
-          .from(employees)
-          .where(eq(employees.empNo, empNo))
-          .limit(1);
-
-        if (!updatedEmployee.length) {
+        const updatedRow = await this.employeesRepository.txUpdate(tx, empNo, updateData);
+        if (!updatedRow) {
           throw new NotFoundError(`Employee with ID ${empNo}`);
         }
 
         // Example department update inside the same transaction
-        await tx
-          .update(departments)
-          .set({ deptName: 'Data Science: ' + empNo.toString() })
-          .where(eq(departments.deptNo, 'd009'))
-          .limit(1);
+        await this.departmentsRepository.txUpdateOneByCondition(
+          tx,
+          { deptNo: 'd009' },
+          {
+            deptName: 'Data Science: ' + empNo.toString(),
+          },
+        );
 
-        return updatedEmployee[0];
+        // throw new Error('Simulated error to test transaction rollback');
+
+        return updatedRow;
       });
     } catch (e) {
       handleServiceError(e, 'Failed to update employee');

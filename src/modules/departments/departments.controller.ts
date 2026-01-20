@@ -20,7 +20,12 @@ import {
   GetDepartmentResponse,
 } from '@modules/departments/dto';
 import { EntityMapper } from '@common/mappers/entity.mapper';
-import { ResponseInterceptor } from '@common/interceptors/response.interceptor';
+import {
+  ResponseInterceptor,
+  CacheResponseInterceptor,
+  CacheResponse,
+  InvalidateCache,
+} from '@common/interceptors';
 import { PaginationQueryDto } from '@common/dto/pagination-query.dto';
 import { ApiResponseDto } from '@common/dto/paginated-response.dto';
 import { Public } from '../auth/decorators/public.decorator';
@@ -30,7 +35,7 @@ import { RateLimitGuard, RateLimit } from '@common/guards/rate-limit.guard';
 @ApiBearerAuth('JWT-auth')
 @Controller('departments')
 // @Roles(Role.Admin)
-@UseInterceptors(ResponseInterceptor)
+@UseInterceptors(ResponseInterceptor, CacheResponseInterceptor)
 @UseGuards(RateLimitGuard)
 @RateLimit()
 export class DepartmentsController {
@@ -39,6 +44,7 @@ export class DepartmentsController {
   @Get()
   @ApiOperation({ summary: 'Get all departments (cached)' })
   @ApiResponse({ status: 200, type: ApiResponseDto })
+  @CacheResponse() // Cache based on query params
   @Public()
   public async findAll(@Query() query: PaginationQueryDto): Promise<GetDepartmentResponse[]> {
     const departments = await this.departmentsService.findAll(query.pageId, query.pageSize);
@@ -56,6 +62,7 @@ export class DepartmentsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get department by ID' })
   @ApiResponse({ status: 200, type: GetDepartmentResponse })
+  @CacheResponse() // Cache based on :id param
   public async findOne(@Param('id') id: string): Promise<GetDepartmentResponse> {
     const department = await this.departmentsService.findOne(id);
     return EntityMapper.toDepartmentResponse(department);
@@ -64,6 +71,7 @@ export class DepartmentsController {
   @Post()
   @ApiOperation({ summary: 'Create new department' })
   @ApiResponse({ status: 201, type: GetDepartmentResponse })
+  @InvalidateCache() // Increment cache version
   public async create(
     @Body() createDepartmentRequest: CreateDepartmentRequest,
   ): Promise<GetDepartmentResponse> {
@@ -74,6 +82,7 @@ export class DepartmentsController {
   @Put(':id')
   @ApiOperation({ summary: 'Update department' })
   @ApiResponse({ status: 200, type: GetDepartmentResponse })
+  @InvalidateCache() // Increment cache version
   public async update(
     @Param('id') id: string,
     @Body() updateDepartmentRequest: UpdateDepartmentRequest,
@@ -86,6 +95,7 @@ export class DepartmentsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete department' })
   @ApiResponse({ status: 204, description: 'Department deleted successfully' })
+  @InvalidateCache() // Increment cache version
   public async remove(@Param('id') id: string): Promise<void> {
     return this.departmentsService.remove(id);
   }

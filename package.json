@@ -21,6 +21,7 @@
     "db:export:structure": "ts-node -r tsconfig-paths/register drizzle/backup/export-structure.ts",
     "db:export:data": "ts-node -r tsconfig-paths/register drizzle/backup/export-data.ts",
     "db:import": "ts-node -r tsconfig-paths/register drizzle/backup/import.ts",
+    "db:studio": "drizzle-kit studio",
     "dock": "docker-compose up -d",
     "setup": "npm run db:reset && npm run db:migrate && npm run db:seed"
   },

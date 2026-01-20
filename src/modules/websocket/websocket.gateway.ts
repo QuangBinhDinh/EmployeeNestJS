@@ -1,9 +1,6 @@
 import {
   WebSocketGateway,
-  SubscribeMessage,
-  MessageBody,
   WebSocketServer,
-  ConnectedSocket,
   OnGatewayInit,
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -20,7 +17,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
   private logger: Logger = new Logger('WebsocketGateway');
   private clients: Map<WebSocket, string> = new Map();
 
-  afterInit(server: Server) {
+  afterInit(_server: Server) {
     this.logger.log('WebSocket Gateway initialized with ws library');
   }
 

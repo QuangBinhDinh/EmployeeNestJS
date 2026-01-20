@@ -5,11 +5,15 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { GlobalExceptionFilter } from '@common/filters/global-exception.filter';
 import { ValidationError } from './common/exceptions';
+import { WsAdapter } from '@nestjs/platform-ws';
 
 dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
+
+  // Use WS adapter for WebSocket
+  app.useWebSocketAdapter(new WsAdapter(app));
 
   // Enable CORS
   app.enableCors();

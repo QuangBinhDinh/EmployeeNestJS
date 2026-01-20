@@ -9,6 +9,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { SendMailEventListener } from '@/events/listeners/sendmail.event';
 import { ExternalApiModule } from './external-api';
 import { WebsocketModule } from './websocket';
+import { RedisModule } from './redis';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { WebsocketModule } from './websocket';
     EventEmitterModule.forRoot({
       wildcard: true,
     }),
+    RedisModule,
     DatabaseModule,
     EmployeesModule,
     DepartmentsModule,

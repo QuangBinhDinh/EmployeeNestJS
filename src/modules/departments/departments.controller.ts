@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { DepartmentsService } from '@modules/departments/departments.service';
@@ -23,18 +24,22 @@ import { ResponseInterceptor } from '@common/interceptors/response.interceptor';
 import { PaginationQueryDto } from '@common/dto/pagination-query.dto';
 import { ApiResponseDto } from '@common/dto/paginated-response.dto';
 import { Public } from '../auth/decorators/public.decorator';
+import { RateLimitGuard, RateLimit } from '@common/guards/rate-limit.guard';
 
 @ApiTags('Departments')
 @ApiBearerAuth('JWT-auth')
 @Controller('departments')
 // @Roles(Role.Admin)
 @UseInterceptors(ResponseInterceptor)
+@UseGuards(RateLimitGuard)
+@RateLimit()
 export class DepartmentsController {
   public constructor(private readonly departmentsService: DepartmentsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all departments' })
+  @ApiOperation({ summary: 'Get all departments (cached)' })
   @ApiResponse({ status: 200, type: ApiResponseDto })
+  @Public()
   public async findAll(@Query() query: PaginationQueryDto): Promise<GetDepartmentResponse[]> {
     const departments = await this.departmentsService.findAll(query.pageId, query.pageSize);
     return departments.map(EntityMapper.toDepartmentResponse);

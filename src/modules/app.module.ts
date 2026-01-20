@@ -7,6 +7,7 @@ import { UsersModule } from '@modules/users/users.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { SendMailEventListener } from '@/events/listeners/sendmail.event';
+import { ExternalApiModule } from './external-api';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { SendMailEventListener } from '@/events/listeners/sendmail.event';
     DepartmentsModule,
     UsersModule,
     AuthModule,
+    ExternalApiModule,
   ],
   providers: [SendMailEventListener],
 })

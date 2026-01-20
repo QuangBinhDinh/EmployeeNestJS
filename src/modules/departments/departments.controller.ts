@@ -22,6 +22,7 @@ import { EntityMapper } from '@common/mappers/entity.mapper';
 import { ResponseInterceptor } from '@common/interceptors/response.interceptor';
 import { PaginationQueryDto } from '@common/dto/pagination-query.dto';
 import { ApiResponseDto } from '@common/dto/paginated-response.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('Departments')
 @ApiBearerAuth('JWT-auth')
@@ -37,6 +38,14 @@ export class DepartmentsController {
   public async findAll(@Query() query: PaginationQueryDto): Promise<GetDepartmentResponse[]> {
     const departments = await this.departmentsService.findAll(query.pageId, query.pageSize);
     return departments.map(EntityMapper.toDepartmentResponse);
+  }
+
+  @Get('external')
+  @ApiOperation({ summary: 'Fetch external data' })
+  @ApiResponse({ status: 200, description: 'External data fetched successfully' })
+  @Public()
+  public async fetchExternal(): Promise<any> {
+    return this.departmentsService.fetchExternal();
   }
 
   @Get(':id')

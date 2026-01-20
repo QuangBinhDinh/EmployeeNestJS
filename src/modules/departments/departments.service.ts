@@ -4,12 +4,14 @@ import { CreateDepartmentRequest, UpdateDepartmentRequest } from '@modules/depar
 import { Department } from '@modules/departments/departments.schema';
 import { NotFoundError, handleServiceError } from '@common/exceptions';
 import { PaginationMetadata } from '@common/services/pagination-metadata.service';
+import { ExternalApiService } from '@modules/external-api';
 
 @Injectable()
 export class DepartmentsService {
   public constructor(
     private readonly departmentsRepository: DepartmentsRepository,
     private readonly paginationMetadata: PaginationMetadata,
+    private readonly externalApiService: ExternalApiService,
   ) {}
 
   public async findAll(pageId?: number, pageSize?: number): Promise<Department[]> {
@@ -69,6 +71,15 @@ export class DepartmentsService {
       }
     } catch (e) {
       handleServiceError(e, 'Failed to delete department');
+    }
+  }
+
+  public async fetchExternal(): Promise<any> {
+    try {
+      const externalData = await this.externalApiService.get('posts');
+      return externalData;
+    } catch (e) {
+      handleServiceError(e, 'Failed to fetch external');
     }
   }
 }

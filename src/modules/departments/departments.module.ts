@@ -3,8 +3,10 @@ import { DepartmentsController } from '@modules/departments/departments.controll
 import { DepartmentsService } from '@modules/departments/departments.service';
 import { DepartmentsRepository } from '@modules/departments/departments.repository';
 import { PaginationMetadata } from '@common/services/pagination-metadata.service';
+import { ExternalApiModule } from '../external-api';
 
 @Module({
+  imports: [ExternalApiModule],
   controllers: [DepartmentsController],
   providers: [DepartmentsService, DepartmentsRepository, PaginationMetadata],
   exports: [DepartmentsRepository],

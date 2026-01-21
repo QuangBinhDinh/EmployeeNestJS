@@ -21,10 +21,33 @@ services:
       timeout: 20s
       retries: 10
 
+  mqtt:
+    image: eclipse-mosquitto:2
+    container_name: employee-mqtt
+    restart: unless-stopped
+    ports:
+      - '1883:1883'
+      - '9001:9001'
+    volumes:
+      - mqtt_data:/mosquitto/data
+      - mqtt_log:/mosquitto/log
+      - ./mosquitto/config:/mosquitto/config
+    networks:
+      - employee-network
+    healthcheck:
+      test: ['CMD', 'mosquitto_sub', '-t', '$$SYS/#', '-C', '1', '-i', 'healthcheck', '-W', '3']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 networks:
   employee-network:
     driver: bridge
 
 volumes:
   mysql_data:
+    driver: local
+  mqtt_data:
+    driver: local
+  mqtt_log:
     driver: local

@@ -78,6 +78,9 @@ async function bootstrap() {
 
   console.log(`Application is running on: http://localhost:${port}`);
   console.log(`Swagger documentation: http://localhost:${port}/api`);
+  console.log(
+    `MQTT broker: mqtt://${process.env.MQTT_HOST || 'localhost'}:${process.env.MQTT_PORT || '1883'}`,
+  );
 }
 
 bootstrap();

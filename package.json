@@ -23,7 +23,8 @@
     "db:import": "ts-node -r tsconfig-paths/register drizzle/backup/import.ts",
     "db:studio": "drizzle-kit studio",
     "dock": "docker-compose up -d",
-    "setup": "npm run db:reset && npm run db:migrate && npm run db:seed"
+    "setup": "npm run db:reset && npm run db:migrate && npm run db:seed",
+    "mqtt:simulate": "ts-node -r tsconfig-paths/register scripts/iot-simulator.ts"
   },
   "keywords": [],
   "author": "",
@@ -35,6 +36,7 @@
     "@nestjs/core": "^11.1.10",
     "@nestjs/event-emitter": "^3.0.1",
     "@nestjs/jwt": "^11.0.2",
+    "@nestjs/microservices": "^11.1.12",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.10",
     "@nestjs/platform-socket.io": "^11.1.12",
@@ -48,6 +50,7 @@
     "class-validator": "^0.14.3",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
+    "mqtt": "^5.14.1",
     "mysql2": "^3.16.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",

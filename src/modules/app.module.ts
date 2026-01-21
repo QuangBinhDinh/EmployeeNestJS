@@ -9,6 +9,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { SendMailEventListener } from '@/events/listeners/sendmail.event';
 import { ExternalApiModule } from './external-api';
 import { WebsocketModule } from './websocket';
+import { MqttModule } from './mqtt';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { WebsocketModule } from './websocket';
     AuthModule,
     ExternalApiModule,
     WebsocketModule,
+    MqttModule,
   ],
   providers: [SendMailEventListener],
 })

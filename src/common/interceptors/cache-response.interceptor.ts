@@ -40,17 +40,17 @@ export interface CacheInvalidateOptions {
 /**
  * @CacheResponse decorator - Cache HTTP responses at controller level
  *
- * Automatically generates cache key: {prefix}:{urlPath}:{queryJSON}:v{version}
- * Uses cache versioning for efficient invalidation
+ * Automatically generates cache key: {prefix}:{fullUrl}
+ * where fullUrl = path with resolved params + query string
  *
  * @example
- * // Cache key: departments:/departments:{"pageId":"1","pageSize":"10"}:v1
+ * // Cache key: departments:/departments?pageId=1&pageSize=10
  * @Get()
  * @CacheResponse()
  * findAll(@Query() query: PaginationDto) { ... }
  *
  * @example
- * // Cache key: departments:/departments/123:v1
+ * // Cache key: departments:/departments/123
  * @Get(':id')
  * @CacheResponse({ prefix: 'departments', ttl: 600 })
  * findOne(@Param('id') id: string) { ... }
@@ -59,10 +59,9 @@ export const CacheResponse = (options: CacheResponseOptions = {}) =>
   SetMetadata(CACHE_KEY, options);
 
 /**
- * @InvalidateCache decorator - Invalidate cache by incrementing version
+ * @InvalidateCache decorator - Invalidate all cache entries
  *
- * Deletes all cached keys with old version pattern, then increments version.
- * New requests will use new version keys, keeping cache clean.
+ * Deletes all keys matching pattern: {prefix}:*
  *
  * @example
  * @Post()
@@ -106,7 +105,7 @@ export class CacheResponseInterceptor implements NestInterceptor {
       return next.handle().pipe(
         tap(async () => {
           try {
-            await this.incrementCacheVersion(prefix);
+            await this.invalidateCache(prefix);
             this.logger.debug(`Cache invalidated for prefix: ${prefix}`);
           } catch (error) {
             this.logger.error(`Failed to invalidate cache: ${error}`);
@@ -120,11 +119,8 @@ export class CacheResponseInterceptor implements NestInterceptor {
       const prefix = cacheOptions.prefix || controllerName;
       const ttl = cacheOptions.ttl ?? REDIS_CACHE_TTL_SECONDS;
 
-      // Get current cache version
-      const version = await this.getCacheVersion(prefix);
-
       // Generate cache key from request details
-      const cacheKey = this.generateCacheKey(prefix, version, request);
+      const cacheKey = this.generateCacheKey(prefix, request);
 
       // Try to get cached response
       const cached = await this.redisService.get<any>(cacheKey);
@@ -153,13 +149,11 @@ export class CacheResponseInterceptor implements NestInterceptor {
 
   /**
    * Generate cache key from request details
-   * Format: {prefix}:{urlPath}:{queryJSON}:v{version}
+   * Format: {prefix}:{fullUrl}
    *
-   * - urlPath: path with resolved params (e.g., /departments/123)
-   * - queryJSON: JSON stringified query params
-   * - version: cache version number for invalidation
+   * Example: departments:/departments/123?pageId=1&pageSize=10
    */
-  private generateCacheKey(prefix: string, version: number, request: any): string {
+  private generateCacheKey(prefix: string, request: any): string {
     const path = request.route?.path || request.path;
 
     // Get path params (e.g., { id: '123' })
@@ -174,57 +168,26 @@ export class CacheResponseInterceptor implements NestInterceptor {
       resolvedPath = resolvedPath.replace(`:${key}`, String(value));
     }
 
-    // JSON stringify query params (sorted for consistency)
-    const sortedQuery: Record<string, any> = {};
-    Object.keys(query)
+    // Build query string (sorted for consistency)
+    const queryString = Object.keys(query)
       .sort()
-      .forEach((key) => {
-        sortedQuery[key] = query[key];
-      });
-    const queryJSON = Object.keys(sortedQuery).length > 0 ? JSON.stringify(sortedQuery) : '';
+      .map((key) => `${key}=${query[key]}`)
+      .join('&');
 
-    // Build cache key: prefix:urlPath:queryJSON:vN
-    const keyParts = [prefix, resolvedPath];
+    // Build full URL
+    const fullUrl = queryString ? `${resolvedPath}?${queryString}` : resolvedPath;
 
-    if (queryJSON) {
-      keyParts.push(queryJSON);
-    }
-
-    keyParts.push(`v${version}`);
-
-    return keyParts.join(':');
+    // Cache key: prefix:fullUrl
+    return `${prefix}:${fullUrl}`;
   }
 
   /**
-   * Get current cache version for a prefix
+   * Invalidate all cache entries for a given prefix
+   * Deletes all keys matching pattern: {prefix}:*
    */
-  private async getCacheVersion(prefix: string): Promise<number> {
-    const versionKey = `${prefix}:__version__`;
-    const version = await this.redisService.get<number>(versionKey);
-    return version ?? 1;
-  }
-
-  /**
-   * Increment cache version and delete old version keys
-   * 1. Get current version
-   * 2. Delete all keys with old version pattern
-   * 3. Increment version number
-   */
-  private async incrementCacheVersion(prefix: string): Promise<number> {
-    const versionKey = `${prefix}:__version__`;
-    const currentVersion = await this.getCacheVersion(prefix);
-    const newVersion = currentVersion + 1;
-
-    // Delete all cached keys with old version
-    // Pattern: {prefix}:*:v{oldVersion}
-    const oldVersionPattern = `${prefix}:*:v${currentVersion}`;
-    await this.redisService.delByPattern(oldVersionPattern);
-    this.logger.debug(`Deleted old cache keys: ${oldVersionPattern}`);
-
-    // Store new version (no TTL - version persists forever)
-    await this.redisService.set(versionKey, newVersion);
-
-    this.logger.debug(`Cache version incremented: ${prefix} v${currentVersion} -> v${newVersion}`);
-    return newVersion;
+  private async invalidateCache(prefix: string): Promise<void> {
+    const pattern = `${prefix}:*`;
+    await this.redisService.delByPattern(pattern);
+    this.logger.debug(`Deleted all cache keys matching: ${pattern}`);
   }
 }

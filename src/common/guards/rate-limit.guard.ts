@@ -7,7 +7,7 @@ import {
   SetMetadata,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { RedisService } from '@modules/redis';
+import { RedisCacheService } from '@modules/redis';
 
 export const RATE_LIMIT_KEY = 'rate_limit';
 
@@ -32,7 +32,7 @@ export const RateLimit = (maxRequests = 100, windowSeconds = 60) => {
 export class RateLimitGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly redisService: RedisService,
+    private readonly redisCacheService: RedisCacheService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -56,7 +56,7 @@ export class RateLimitGuard implements CanActivate {
     const routeKey = `${request.method}:${request.route.path}`;
     const key = `${routeKey}:${identifier}`;
 
-    const { limited, remaining, resetIn } = await this.redisService.isRateLimited(
+    const { limited, remaining, resetIn } = await this.redisCacheService.isRateLimited(
       key,
       options.maxRequests,
       options.windowSeconds,

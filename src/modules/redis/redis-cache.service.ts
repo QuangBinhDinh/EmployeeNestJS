@@ -1,39 +1,66 @@
 import { Injectable, OnModuleDestroy, OnModuleInit, Logger } from '@nestjs/common';
-import Redis from 'ioredis';
+import Redis, { RedisOptions } from 'ioredis';
 
 @Injectable()
-export class RedisService implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(RedisService.name);
+export class RedisCacheService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(RedisCacheService.name);
   private client: Redis;
-  private subscriber: Redis;
-  private publisher: Redis;
+
+  private getConfig(): RedisOptions {
+    return {
+      host: process.env.REDIS_CACHE_HOST || process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_CACHE_PORT || process.env.REDIS_PORT || '6379'),
+      password: process.env.REDIS_CACHE_PASSWORD || process.env.REDIS_PASSWORD || undefined,
+      db: parseInt(process.env.REDIS_CACHE_DB || process.env.REDIS_DB || '0'),
+    };
+  }
 
   async onModuleInit() {
-    const redisConfig = {
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD || undefined,
-      db: parseInt(process.env.REDIS_DB || '0'),
-    };
+    const config = this.getConfig();
 
-    this.client = new Redis(redisConfig);
-    this.subscriber = new Redis(redisConfig);
-    this.publisher = new Redis(redisConfig);
+    this.client = new Redis(config);
 
     this.client.on('connect', () => {
-      this.logger.log('Redis client connected');
+      this.logger.log(`Redis Cache connected (${config.host}:${config.port})`);
     });
 
     this.client.on('error', (err) => {
-      this.logger.error('Redis client error:', err);
+      this.logger.error('Redis Cache error:', err);
+    });
+
+    await this.waitForConnection();
+  }
+
+  private async waitForConnection(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (this.client.status === 'ready') {
+        resolve();
+        return;
+      }
+
+      const timeout = setTimeout(() => {
+        reject(new Error('Redis Cache connection timeout'));
+      }, 5000);
+
+      this.client.once('ready', () => {
+        clearTimeout(timeout);
+        resolve();
+      });
+
+      this.client.once('error', (err) => {
+        clearTimeout(timeout);
+        reject(err);
+      });
     });
   }
 
   async onModuleDestroy() {
     await this.client?.quit();
-    await this.subscriber?.quit();
-    await this.publisher?.quit();
-    this.logger.log('Redis connections closed');
+    this.logger.log('Redis Cache connection closed');
+  }
+
+  isReady(): boolean {
+    return this.client?.status === 'ready';
   }
 
   // ============================================
@@ -164,45 +191,6 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       remaining,
       resetIn,
     };
-  }
-
-  // ============================================
-  // PUB/SUB FOR REAL-TIME NOTIFICATIONS
-  // ============================================
-
-  /**
-   * Publish a message to a channel
-   */
-  async publish(channel: string, message: any): Promise<void> {
-    const serialized = JSON.stringify(message);
-    await this.publisher.publish(channel, serialized);
-    this.logger.debug(`Published to ${channel}:`, message);
-  }
-
-  /**
-   * Subscribe to a channel
-   */
-  async subscribe(channel: string, callback: (message: any) => void): Promise<void> {
-    await this.subscriber.subscribe(channel);
-    this.subscriber.on('message', (ch, msg) => {
-      if (ch === channel) {
-        try {
-          const parsed = JSON.parse(msg);
-          callback(parsed);
-        } catch {
-          callback(msg);
-        }
-      }
-    });
-    this.logger.log(`Subscribed to channel: ${channel}`);
-  }
-
-  /**
-   * Unsubscribe from a channel
-   */
-  async unsubscribe(channel: string): Promise<void> {
-    await this.subscriber.unsubscribe(channel);
-    this.logger.log(`Unsubscribed from channel: ${channel}`);
   }
 
   // ============================================

@@ -21,10 +21,29 @@ services:
       timeout: 20s
       retries: 10
 
-  redis:
+  # Redis for caching, rate limiting, and key-value operations
+  redis-cache:
     image: redis:alpine
+    container_name: redis-cache
+    restart: unless-stopped
     ports:
       - '6379:6379'
+    networks:
+      - employee-network
+    # Cache config: maxmemory + LRU eviction, no persistence needed
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --save "" --appendonly no
+
+  # Redis for pub/sub messaging (lightweight, no persistence needed)
+  redis-pubsub:
+    image: redis:alpine
+    container_name: redis-pubsub
+    restart: unless-stopped
+    ports:
+      - '6380:6379'
+    networks:
+      - employee-network
+    # No persistence for pub/sub (messages are ephemeral)
+    command: redis-server --save "" --appendonly no
 
 networks:
   employee-network:

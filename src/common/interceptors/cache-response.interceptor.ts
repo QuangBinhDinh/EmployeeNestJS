@@ -9,7 +9,7 @@ import {
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Reflector } from '@nestjs/core';
-import { RedisService } from '@modules/redis';
+import { RedisCacheService } from '@modules/redis';
 import { REDIS_CACHE_TTL_SECONDS } from '@/constants';
 
 // Metadata keys
@@ -82,7 +82,7 @@ export class CacheResponseInterceptor implements NestInterceptor {
 
   constructor(
     private readonly reflector: Reflector,
-    private readonly redisService: RedisService,
+    private readonly redisCacheService: RedisCacheService,
   ) {}
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
@@ -123,7 +123,7 @@ export class CacheResponseInterceptor implements NestInterceptor {
       const cacheKey = this.generateCacheKey(prefix, request);
 
       // Try to get cached response
-      const cached = await this.redisService.get<any>(cacheKey);
+      const cached = await this.redisCacheService.get<any>(cacheKey);
       if (cached !== null) {
         this.logger.debug(`Cache HIT: ${cacheKey}`);
         return of(cached);
@@ -135,7 +135,7 @@ export class CacheResponseInterceptor implements NestInterceptor {
       return next.handle().pipe(
         tap(async (response) => {
           try {
-            await this.redisService.set(cacheKey, response, ttl);
+            await this.redisCacheService.set(cacheKey, response, ttl);
           } catch (error) {
             this.logger.error(`Failed to cache response: ${error}`);
           }
@@ -187,7 +187,7 @@ export class CacheResponseInterceptor implements NestInterceptor {
    */
   private async invalidateCache(prefix: string): Promise<void> {
     const pattern = `${prefix}:*`;
-    await this.redisService.delByPattern(pattern);
+    await this.redisCacheService.delByPattern(pattern);
     this.logger.debug(`Deleted all cache keys matching: ${pattern}`);
   }
 }

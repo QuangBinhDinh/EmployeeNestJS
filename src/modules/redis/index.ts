@@ -1,2 +1,3 @@
 export { RedisModule } from './redis.module';
-export { RedisService } from './redis.service';
+export { RedisCacheService } from './redis-cache.service';
+export { RedisPubSubService } from './redis-pubsub.service';

@@ -5,7 +5,7 @@ import { Department } from '@modules/departments/departments.schema';
 import { NotFoundError, handleServiceError } from '@common/exceptions';
 import { PaginationMetadata } from '@common/services/pagination-metadata.service';
 import { ExternalApiService } from '@modules/external-api';
-import { RedisService } from '@modules/redis';
+import { RedisPubSubService } from '@modules/redis';
 
 @Injectable()
 export class DepartmentsService {
@@ -15,7 +15,7 @@ export class DepartmentsService {
     private readonly departmentsRepository: DepartmentsRepository,
     private readonly paginationMetadata: PaginationMetadata,
     private readonly externalApiService: ExternalApiService,
-    private readonly redisService: RedisService,
+    private readonly redisPubSubService: RedisPubSubService,
   ) {}
 
   public async findAll(pageId?: number, pageSize?: number): Promise<Department[]> {
@@ -53,7 +53,7 @@ export class DepartmentsService {
       const createdRow = await this.departmentsRepository.create(departmentData);
 
       // Publish event for real-time notifications
-      await this.redisService.publish('department:created', {
+      await this.redisPubSubService.publish('department:created', {
         action: 'created',
         data: createdRow,
         timestamp: new Date().toISOString(),
@@ -70,7 +70,7 @@ export class DepartmentsService {
       const updatedRow = await this.departmentsRepository.update(deptNo, request);
 
       // Publish event for real-time notifications
-      await this.redisService.publish('department:updated', {
+      await this.redisPubSubService.publish('department:updated', {
         action: 'updated',
         data: updatedRow,
         timestamp: new Date().toISOString(),
@@ -90,7 +90,7 @@ export class DepartmentsService {
       }
 
       // Publish event for real-time notifications
-      await this.redisService.publish('department:deleted', {
+      await this.redisPubSubService.publish('department:deleted', {
         action: 'deleted',
         data: { deptNo },
         timestamp: new Date().toISOString(),

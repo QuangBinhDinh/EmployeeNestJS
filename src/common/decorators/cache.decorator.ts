@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { RedisService } from '@modules/redis';
+import { RedisCacheService } from '@modules/redis';
 import { REDIS_CACHE_TTL_SECONDS } from '@/constants';
 
 export interface CacheOptions {
@@ -32,7 +32,7 @@ export interface CacheInvalidateOptions {
 /**
  * @Cacheable decorator - Automatically cache method results
  *
- * Requirements: The service class MUST have `redisService` property injected
+ * Requirements: The service class MUST have `redisCacheService` property injected
  *
  * @example
  * // Basic usage - caches with auto-generated key
@@ -63,11 +63,11 @@ export function Cacheable(options: CacheOptions = {}): MethodDecorator {
     const logger = new Logger(`Cacheable:${target.constructor.name}`);
 
     descriptor.value = async function (...args: any[]) {
-      // Get RedisService from the class instance (must be injected as 'redisService')
-      const redisService: RedisService = (this as any).redisService;
+      // Get RedisCacheService from the class instance (must be injected as 'redisCacheService')
+      const redisCacheService: RedisCacheService = (this as any).redisCacheService;
 
-      if (!redisService) {
-        logger.warn(`RedisService not found, executing without cache: ${methodName}`);
+      if (!redisCacheService) {
+        logger.warn(`RedisCacheService not found, executing without cache: ${methodName}`);
         return originalMethod.apply(this, args);
       }
 
@@ -86,8 +86,8 @@ export function Cacheable(options: CacheOptions = {}): MethodDecorator {
 
       const cacheKey = `${prefix}:${keySuffix}`;
 
-      // Use getOrSet pattern from RedisService
-      return redisService.getOrSet(cacheKey, () => originalMethod.apply(this, args), ttl);
+      // Use getOrSet pattern from RedisCacheService
+      return redisCacheService.getOrSet(cacheKey, () => originalMethod.apply(this, args), ttl);
     };
 
     return descriptor;
@@ -100,7 +100,7 @@ export function Cacheable(options: CacheOptions = {}): MethodDecorator {
  * Invalidates ALL keys with the service prefix (e.g., 'departments:*')
  * This is the safest approach for mutations to avoid cache inconsistency.
  *
- * Requirements: The service class MUST have `redisService` property injected
+ * Requirements: The service class MUST have `redisCacheService` property injected
  *
  * @example
  * // Default: Invalidate all keys with auto-detected prefix
@@ -126,11 +126,11 @@ export function CacheInvalidate(options: CacheInvalidateOptions = {}): MethodDec
       // Execute original method first
       const result = await originalMethod.apply(this, args);
 
-      // Get RedisService from the class instance
-      const redisService: RedisService = (this as any).redisService;
+      // Get RedisCacheService from the class instance
+      const redisCacheService: RedisCacheService = (this as any).redisCacheService;
 
-      if (!redisService) {
-        logger.warn(`RedisService not found, skipping cache invalidation: ${methodName}`);
+      if (!redisCacheService) {
+        logger.warn(`RedisCacheService not found, skipping cache invalidation: ${methodName}`);
         return result;
       }
 
@@ -138,7 +138,7 @@ export function CacheInvalidate(options: CacheInvalidateOptions = {}): MethodDec
 
       try {
         // Invalidate all keys with the prefix
-        await redisService.delByPattern(`${prefix}:*`);
+        await redisCacheService.delByPattern(`${prefix}:*`);
         logger.debug(`Invalidated all cache keys: ${prefix}:*`);
       } catch (error) {
         logger.error(`Failed to invalidate cache: ${error}`);

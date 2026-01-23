@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "59c704bf-2df4-4ed9-a319-1fffafd5ad6f",
+  "id": "35bf190d-f5c3-4ac0-b3e3-2d63b57abc90",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "departments": {
@@ -160,6 +160,13 @@
         "app_version": {
           "name": "app_version",
           "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "logs": {
+          "name": "logs",
+          "type": "mediumtext",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false

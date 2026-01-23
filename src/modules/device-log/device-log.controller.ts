@@ -23,7 +23,7 @@ export class DeviceLogsController {
   }
 
   @Post('message')
-  @ApiOperation({ summary: 'Create new department' })
+  @ApiOperation({ summary: 'Push device log messages' })
   @ApiResponse({ status: 201 })
   public async create(@Body() request: CreateDeviceLogRequest): Promise<void> {
     await this.deviceLogService.pushLogMessages(request);

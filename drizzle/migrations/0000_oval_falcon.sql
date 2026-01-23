@@ -24,6 +24,7 @@ CREATE TABLE `device_log` (
 	`platform` varchar(10) NOT NULL,
 	`os_version` varchar(10) NOT NULL,
 	`app_version` varchar(10) NOT NULL,
+	`logs` mediumtext NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `device_log_id` PRIMARY KEY(`id`)

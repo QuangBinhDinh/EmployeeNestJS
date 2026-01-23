@@ -1,25 +1,25 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { handleServiceError } from '@common/exceptions';
 import { DeviceLogRepository } from './device-log.repository';
-import { DeviceDetailLogRepository } from './device-detail-log.repository';
 import { DeviceLogWithDetails } from './device-log.type';
-import { DATABASE_CONNECTION } from '@/database';
-import { MySql2Database } from 'drizzle-orm/mysql2';
 import { CreateDeviceLogRequest } from './dto';
 
 @Injectable()
 export class DeviceLogService {
-  public constructor(
-    private readonly deviceLogRepository: DeviceLogRepository,
-    private readonly deviceDetailLogRepository: DeviceDetailLogRepository,
-    @Inject(DATABASE_CONNECTION) private readonly db: MySql2Database,
-  ) {}
+  public constructor(private readonly deviceLogRepository: DeviceLogRepository) {}
 
   public async findLogsByAccountNumber(accountNo: string): Promise<DeviceLogWithDetails> {
     try {
       const deviceInfo = await this.deviceLogRepository.findByCondition({ accountNo });
-      const logs = await this.deviceDetailLogRepository.findByCondition({ accountNo });
-      return { ...deviceInfo[0], logs };
+      if (!deviceInfo || deviceInfo.length === 0) {
+        return null;
+      }
+
+      // Parse JSON logs back to array
+      const { logs: logsJson, ...rest } = deviceInfo[0];
+      const logs = JSON.parse(logsJson);
+
+      return { ...rest, logs };
     } catch (error) {
       handleServiceError(error, 'DeviceLogService');
     }
@@ -27,21 +27,15 @@ export class DeviceLogService {
 
   public async pushLogMessages(request: CreateDeviceLogRequest): Promise<void> {
     try {
-      return await this.db.transaction(async (tx) => {
-        const { logs, ...deviceInfo } = request;
-        const existed = await this.deviceLogRepository.txFindByCondition(tx, {
-          accountNo: request.accountNo,
-        });
-        if (existed.length === 0) {
-          await this.deviceLogRepository.txCreate(tx, deviceInfo);
-        }
-        // Bulk insert all logs in a single query for better performance
-        const logsToInsert = logs.map((message) => ({
-          message,
-          accountNo: request.accountNo,
-        }));
-        await this.deviceDetailLogRepository.txBulkCreate(tx, logsToInsert);
-      });
+      const { logs, ...deviceInfo } = request;
+
+      // Store logs as JSON string - single write operation for better performance
+      const deviceLogData = {
+        ...deviceInfo,
+        logs: JSON.stringify(logs),
+      };
+
+      await this.deviceLogRepository.create(deviceLogData);
     } catch (error) {
       handleServiceError(error, 'DeviceLogService');
     }

@@ -8,6 +8,27 @@ CREATE TABLE `departments` (
 	CONSTRAINT `departments_dept_no_unique` UNIQUE(`dept_no`)
 );
 --> statement-breakpoint
+CREATE TABLE `device_detail_log` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`account_no` varchar(32) NOT NULL,
+	`message` text NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `device_detail_log_id` PRIMARY KEY(`id`)
+);
+--> statement-breakpoint
+CREATE TABLE `device_log` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`device_id` varchar(64) NOT NULL,
+	`account_no` varchar(32) NOT NULL,
+	`platform` varchar(10) NOT NULL,
+	`os_version` varchar(10) NOT NULL,
+	`app_version` varchar(10) NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `device_log_id` PRIMARY KEY(`id`)
+);
+--> statement-breakpoint
 CREATE TABLE `employees` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`emp_no` int NOT NULL,

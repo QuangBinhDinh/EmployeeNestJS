@@ -9,6 +9,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { SendMailEventListener } from '@/events/listeners/sendmail.event';
 import { ExternalApiModule } from './external-api';
 import { WebsocketModule } from './websocket';
+import { DeviceLogModule } from './device-log/device-log.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { WebsocketModule } from './websocket';
     AuthModule,
     ExternalApiModule,
     WebsocketModule,
+    DeviceLogModule,
   ],
   providers: [SendMailEventListener],
 })

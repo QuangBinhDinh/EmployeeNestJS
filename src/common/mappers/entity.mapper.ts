@@ -4,6 +4,8 @@ import { User } from '@modules/users/users.schema';
 import { GetEmployeeResponse } from '@modules/employees/dto/response/get-employee.response';
 import { GetDepartmentResponse } from '@modules/departments/dto/response/get-department.response';
 import { GetUserResponse } from '@modules/users/dto/response/get-user.response';
+import { DeviceLogWithDetails } from '@/modules/device-log';
+import { GetDeviceLogResponse } from '@/modules/device-log/dto';
 
 export class EntityMapper {
   /**
@@ -36,15 +38,19 @@ export class EntityMapper {
   }
 
   // Convenience methods using the generic function
-  public static toEmployeeResponse(employee: Employee): GetEmployeeResponse {
-    return EntityMapper.toResponse<Employee, GetEmployeeResponse>(employee);
+  public static toEmployeeResponse(data: Employee): GetEmployeeResponse {
+    return EntityMapper.toResponse<Employee, GetEmployeeResponse>(data);
   }
 
-  public static toDepartmentResponse(department: Department): GetDepartmentResponse {
-    return EntityMapper.toResponse<Department, GetDepartmentResponse>(department);
+  public static toDepartmentResponse(data: Department): GetDepartmentResponse {
+    return EntityMapper.toResponse<Department, GetDepartmentResponse>(data);
   }
 
-  public static toUserResponse(user: User): GetUserResponse {
-    return EntityMapper.toResponse<User, GetUserResponse>(user, ['passwordHash']);
+  public static toUserResponse(data: User): GetUserResponse {
+    return EntityMapper.toResponse<User, GetUserResponse>(data, ['passwordHash']);
+  }
+
+  public static toDeviceLogResponse(data: DeviceLogWithDetails): GetDeviceLogResponse {
+    return EntityMapper.toResponse<DeviceLogWithDetails, GetDeviceLogResponse>(data);
   }
 }

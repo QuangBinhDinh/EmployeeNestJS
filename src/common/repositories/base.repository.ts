@@ -116,6 +116,24 @@ export abstract class BaseRepository<T extends MySqlTableWithColumns<any>> {
     return await this.findOne(insertedId);
   }
 
+  /**
+   * Bulk create multiple records
+   */
+  public async bulkCreate(data: InferInsertModel<T>[]): Promise<void> {
+    if (data.length === 0) return;
+    const transformedData = data.map((item) => this.tranformDataInput(item));
+    await this.db.insert(this.table).values(transformedData);
+  }
+
+  /**
+   * Bulk create multiple records within a transaction
+   */
+  public async txBulkCreate(tx: MySql2Database, data: InferInsertModel<T>[]): Promise<void> {
+    if (data.length === 0) return;
+    const transformedData = data.map((item) => this.tranformDataInput(item));
+    await tx.insert(this.table).values(transformedData);
+  }
+
   public async update(
     id: string | number,
     data: Partial<InferInsertModel<T>>,
